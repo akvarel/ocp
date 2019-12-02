@@ -1,0 +1,4 @@
+---
+# tasks file for backup_etcd
+- name: Get
+  command: ls
