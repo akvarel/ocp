@@ -1,0 +1,8 @@
+---
+- name: backup master hosts
+  hosts: masters
+  collections:
+    - ocp.backup_restore
+  tasks:
+    - import_role:
+      name : ping
