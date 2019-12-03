@@ -1,10 +1,10 @@
 ---
 # tasks file for backup_node
-- name: save node config
-  import_tasks: save_node_config.yml
+- import_role:
+    name: save_node_config
 
-- name: save ocp files
-  import_tasks: save_ocp_files.yml
+- import_role:
+    name: save_ocp_files
 
-- name: save installed pkgs list
-  import_tasks: installed_pkgs_list.yml
+- import_role:
+    name: save_pkgs_list

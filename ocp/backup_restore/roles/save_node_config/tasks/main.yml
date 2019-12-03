@@ -1,12 +1,17 @@
 ---
-# Backup of the master host configuration files
+# tasks file for save_node_config
 - name: backup directory {{ MYBACKUPDIR }}/etc/sysconfig exists
   file:
     path: "{{ MYBACKUPDIR }}/etc/sysconfig"
     state: directory
 
+- name: backup directory {{ MYBACKUPDIR }}/etc/origin exists
+  file:
+    path: "{{ MYBACKUPDIR }}/etc/origin"
+    state: directory
+
 - name: save /etc/origin
-  shell: cp -aR /etc/origin {{ MYBACKUPDIR }}/etc
+  shell: cp -aR /etc/origin {{ MYBACKUPDIR }}/etc/origin
 
 - name: save /etc/sysconfig
   shell: cp -aR /etc/sysconfig/* {{ MYBACKUPDIR }}/etc/sysconfig/

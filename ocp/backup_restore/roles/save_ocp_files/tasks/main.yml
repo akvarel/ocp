@@ -1,11 +1,16 @@
 ---
-# Backup of the master host configuration files
+# Backup of the node configuration files
 - name: backup directory {{ MYBACKUPDIR }}/etc/sysconfig exists
+  file:
+    path: "{{ MYBACKUPDIR }}/etc/sysconfig "
+    state: directory
+
+- name: backup directory {{ MYBACKUPDIR }}/etc/pki/ca-trust/source/anchors exists
   file:
     path: "{{ MYBACKUPDIR }}/etc/pki/ca-trust/source/anchors"
     state: directory
 
-- name: save /etc/origin
+- name: /etc/dnsmasq*
   shell: cp -aR /etc/dnsmasq* {{ MYBACKUPDIR }}/etc
 
 - name: save /etc/sysconfig

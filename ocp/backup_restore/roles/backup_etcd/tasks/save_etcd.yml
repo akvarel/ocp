@@ -6,7 +6,12 @@
     state: directory
 
 - name: save etcd configuration
-  shell: cp -aR /etc/etcd/ {{ MYBACKUPDIR }}/etcd-config/
+- synchronize:
+    src: /etc/etcd/
+    dest: {{ MYBACKUPDIR }}/etcd-config/
+    delete: yes
+    recursive: yes
+  delegate_to: "{{ inventory_hostname }}"
 
 - name: get etcd endpoint
   shell: grep https {{ ETCD_POD_MANIFEST }} | cut -d '/' -f3
