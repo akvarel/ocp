@@ -1,0 +1,3 @@
+---
+# vars file for backup_master
+MYBACKUPDIR: "/root/ocp_backup/{{ inventory_hostname }}"

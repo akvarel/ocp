@@ -1,4 +1,7 @@
 ---
 # tasks file for backup_etcd
-- name: Get
-  command: ls
+- name: pre_check tasks
+  import_tasks: pre_check.yml
+
+- name: save etcd data
+  import_tasks: save_etcd.yml
