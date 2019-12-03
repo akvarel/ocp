@@ -1,2 +1,3 @@
 ---
 # vars file for restore_etcd
+MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"

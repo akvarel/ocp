@@ -1,2 +1,3 @@
 ---
 # vars file for backup_pv
+MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"
