@@ -5,3 +5,9 @@
     src: "{{ export_source }}"
     dest: "{{ host_dest_dir }}"
     flat: yes
+
+- name: Remove temp tar.gz file from master
+  file:
+    path: "{{ export_source }}"
+    state: absent
+    recurse: no

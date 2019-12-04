@@ -3,8 +3,12 @@
   hosts: masters
   collections:
     - ocp.backup_restore
+  vars:
+    destination_host_dir: "/tmp/ocp_backup"
   tasks:
     - import_role:
         name : ping
     - debug:
-        msg: "project destination host {{ destination_host | default(destination_host_default) | default('No host') }}"
+        msg:
+        - "project destination host {{ destination_host | default(destination_host_default) | default('No host') }}"
+        - "project export destination dir {{  }}"

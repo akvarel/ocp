@@ -3,7 +3,7 @@
 - name: compress backup directory
   archive:
     path: "{{ MYBACKUPDIR }}"
-    dest: "{{ MYBACKUPDIR }}.tar.gz"
+    dest: "{{ export_source }}"
     format: gz
     remove: no
 

@@ -20,6 +20,7 @@
   hosts: nodes,!masters
   collections:
     - ocp.backup_restore
+  tasks:
     - import_role:
       name : backup_nodes
     - import_role:
@@ -30,26 +31,22 @@
   collections:
     - ocp.backup_restore
   connection: local
+  vars:
+    destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
   tasks:
     - name: Create local temp directory for fetching files
       file:
-        path: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
+        path: "{{ destination_host_dir }}"
         state: directory
       register: local_dir
 
 - name: fetch tar files from all hosts
   hosts: OSEv3
+  vars:
+    destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
   tasks:
-    - name: fetch tar files
-      fetch:
-        src: "/root/ocp_backup/{{ inventory_hostname }}.tar.gz"
-        dest: "{{ hostvars['localhost'].local_dir.path }}/"
-        flat: yes
-
-    - name: remove compressed file from remote dir
-      file:
-        path: "/root/ocp_backup"
-        state: absent
+    - import_role:
+      name: export_backup
 
 ### NOTES ####
 # To enable sync to s3, need the following:
