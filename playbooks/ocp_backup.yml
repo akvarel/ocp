@@ -6,6 +6,7 @@
 #
 - name: backup master hosts
   hosts: masters
+  become: true
   collections:
     - ocp.backup_restore
   tasks:
