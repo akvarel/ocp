@@ -1,2 +1,9 @@
 ---
 # tasks file for backup_pv
+- name: Get OCP api endpoint
+  debug:
+    msg: "name"
+
+- name: Get Heketi endpoint
+  debug:
+    msg: "Heketi"

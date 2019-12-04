@@ -1,3 +1,8 @@
 ---
 # vars file for backup_pv
-MYBACKUPDIR: "{{backup_dir_base | default(backup_dir_base_default) | default('/tmp')}}/{{ inventory_hostname }}"
+pv_backup_dir: "{{backup_dir_base | default(backup_dir_base_default) | default('/tmp')}}/{{ ansible_date_time.date }}/pv_"
+mount_point: "/mnt/source"
+userheketi: admin
+snapdir: "/root"
+voldir: "/root"
+vollist: "{{voldir}}/vollist-{{ lookup('pipe', 'date +%Y%m%d-%H:%M') }}.txt"
