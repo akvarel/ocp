@@ -10,5 +10,5 @@
   when: inventory_hostname == groups["masters"][0]
 
 - name: Create serials directory for the first master
-  command: "cp /etc/origin/master/*.serial.txt {{ MYBACKUPDIR }}/serials"
+  shell: "cp -a /etc/origin/master/*.serial.txt {{ MYBACKUPDIR }}/serials"
   when: inventory_hostname == groups["masters"][0]
