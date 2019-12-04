@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  tasks:
+    - name: Install ansible.kubernetes-modules package
+      shell: ansible-galaxy install ansible.kubernetes-modules,v0.3.1-6
+
+- hosts: localhost
+  tasks:
+    - include_role:
+        name: ansible.kubernetes-modules
