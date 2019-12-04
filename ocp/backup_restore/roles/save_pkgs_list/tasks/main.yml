@@ -18,8 +18,10 @@
 
 - name: subscription-manager identity output
   shell: /sbin/subscription-manager identity > {{ MYBACKUPDIR }}/subscription-identity.txt
+  ignore_errors: true
   when: is_subman.stat.exists == True
 
 - name: save list of subscribed repositories
   shell: /sbin/subscription-manager repos --list-enabled | grep 'Repo ID:' | awk '{print $3}' > {{ MYBACKUPDIR }}/enabled-repositories.txt
+  ignore_errors: true
   when: is_subman.stat.exists == True
