@@ -3,7 +3,7 @@
 - name: Copy backup tar.gz back to ansible host machine
   fetch:
     src: "{{ export_source }}"
-    dest: "{{ host_dest_dir }}"
+    dest: "{{ host_dest_dir }}/"
     flat: yes
 
 - name: Remove temp tar.gz file from master
