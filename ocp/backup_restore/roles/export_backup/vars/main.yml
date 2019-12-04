@@ -1,5 +1,5 @@
 ---
 # vars file for export_backup
-MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"
+MYBACKUPDIR: "{{backup_dir_base | default(backup_dir_base_default) | default('/tmp')}}/{{ inventory_hostname }}"
 export_source: "{{MYBACKUPDIR}}.tar.gz"
 host_dest_dir: "{{ destination_host_dir | default(destination_host_dir_default) | default('~/ocp_backup') }}"

@@ -6,9 +6,9 @@
     state: directory
 
 - name: save etcd configuration
-- synchronize:
+  synchronize:
     src: /etc/etcd/
-    dest: {{ MYBACKUPDIR }}/etcd-config/
+    dest: "{{ MYBACKUPDIR }}/etcd-config/"
     delete: yes
     recursive: yes
   delegate_to: "{{ inventory_hostname }}"

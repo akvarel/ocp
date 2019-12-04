@@ -1,5 +1,5 @@
 ---
 # vars file for compress_backup
-MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"
+MYBACKUPDIR: "{{backup_dir_base | default(backup_dir_base_default) | default('/tmp')}}/{{ inventory_hostname }}"
 export_source: "{{MYBACKUPDIR}}.tar.gz"
 

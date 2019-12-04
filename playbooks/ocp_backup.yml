@@ -1,4 +1,4 @@
-----
+---
 # This playbook and the roles follows OCP Day-2 Operation Guide
 # Tested on OCP 3.11
 # Run this playbook from a control host:
@@ -10,11 +10,11 @@
     - ocp.backup_restore
   tasks:
     - import_role:
-      name : backup_etcd
+        name : backup_etcd
     - import_role:
-      name : backup_masters
+        name : backup_master
     - import_role:
-      name : compress_backup
+        name : compress_backup
 
 - name: ocp backup of node hosts
   hosts: nodes,!masters
@@ -22,9 +22,9 @@
     - ocp.backup_restore
   tasks:
     - import_role:
-      name : backup_nodes
+        name : backup_node
     - import_role:
-      name : compress_backup
+        name : compress_backup
 
 - name: Set up directory for fetching tar files
   hosts: localhost
@@ -46,7 +46,7 @@
     destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
   tasks:
     - import_role:
-      name: export_backup
+        name: export_backup
 
 ### NOTES ####
 # To enable sync to s3, need the following:
