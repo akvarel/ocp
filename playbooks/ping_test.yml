@@ -8,8 +8,10 @@
 - hosts: localhost
   remote_user: root
   tasks:
-    - include_role: ansible.kubernetes-modules
-    - include_role: hello-world
+    - include_role:
+        name: ansible.kubernetes-modules
+    - include_role:
+        name: hello-world
 
 - name: Ping hosts
   hosts: masters
