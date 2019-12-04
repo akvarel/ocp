@@ -43,7 +43,7 @@
       register: local_dir
 
 - name: fetch tar files from all hosts
-  hosts: OSEv3
+  hosts: nodes
   become: true
   vars:
     destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
