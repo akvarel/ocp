@@ -1,2 +1,3 @@
 ---
 # vars file for save_ocp_files
+MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"

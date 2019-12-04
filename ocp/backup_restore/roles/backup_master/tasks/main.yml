@@ -1,10 +1,14 @@
 ---
 # tasks file for backup_master
 - import_role:
-    name: save_node_config
+    name: backup_node
 
-- import_role:
-    name: save_ocp_files
+- name: Create serials directory for the first master
+  file:
+      path: "{{ MYBACKUPDIR }}/serials"
+      state: directory
+  when: inventory_hostname == groups["masters"][0]
 
-- import_role:
-    name: save_pkgs_list
+- name: Create serials directory for the first master
+  command: "cp /etc/origin/master/*.serial.txt {{ MYBACKUPDIR }}/serials"
+  when: inventory_hostname == groups["masters"][0]

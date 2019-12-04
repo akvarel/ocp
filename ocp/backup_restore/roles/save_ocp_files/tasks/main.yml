@@ -18,6 +18,7 @@
   with_items:
     - iptables
     - docker-*
+    - atomic-openshift-node
 
 - name: save ca-trust certs
   shell: cp -aR /etc/pki/ca-trust/source/anchors/* {{ MYBACKUPDIR }}/etc/pki/ca-trust/source/anchors/

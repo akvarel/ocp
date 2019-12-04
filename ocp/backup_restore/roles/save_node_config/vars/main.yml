@@ -1,2 +1,3 @@
 ---
 # vars file for save_node_config
+MYBACKUPDIR: "{{backup_dir_base}}/{{ inventory_hostname }}"
