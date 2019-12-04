@@ -6,3 +6,5 @@
   tasks:
     - import_role:
         name : ping
+    - debug:
+        msg: "project destination host {{ destination_host | default(destination_host_default) }}"

@@ -20,9 +20,10 @@
   hosts: nodes,!masters
   collections:
     - ocp.backup_restore
-  roles:
-    - backup_nodes
-    - ocp_backup_compress_backup
+    - import_role:
+      name : backup_nodes
+    - import_role:
+      name : compress_backup
 
 - name: Set up directory for fetching tar files
   hosts: localhost

@@ -1,0 +1,7 @@
+---
+# tasks file for export_backup
+- name: Copy backup tar.gz back to ansible host machine
+  fetch:
+    src: "{{ MYBACKUPDIR }}.tar.gz"
+    dest: "{{ host_dest_dir }}"
+    flat: yes
