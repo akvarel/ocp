@@ -4,6 +4,9 @@
   tasks:
     - name: Install ansible.kubernetes-modules package
       shell: ansible-galaxy install ansible.kubernetes-modules
+
+- hosts: localhost
+  remote_user: root
   roles:
     - role: ansible.kubernetes-modules
     - role: hello-world
