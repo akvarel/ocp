@@ -1,8 +1,14 @@
 ---
 - hosts: localhost
   tasks:
+    - name: Find ansible-galaxy
+      shell: which ansible-galaxy
+      register: galaxy
+
+- hosts: localhost
+  tasks:
     - name: Install ansible.kubernetes-modules package
-      shell: ansible-galaxy install -r {{playbook_dir}}/../requirements.yml
+      shell: "{{galaxy.stdout}} install -r {{playbook_dir}}/../requirements.yml"
       when: remove is undefined
 
     - name: Install python openshift package
@@ -11,13 +17,13 @@
 
     - name: Install ocp.backup_restore collection
       shell: |
-        ansible-galaxy collection build {{playbook_dir}}/../ocp.backup_restore
-        ansible-galaxy collection install ocp-backup_restore-1.0.0.tar.gz
+        {{galaxy.stdout}} collection build {{playbook_dir}}/../ocp.backup_restore
+        {{galaxy.stdout}} collection install ocp-backup_restore-1.0.0.tar.gz
         rm ocp-backup_restore-1.0.0.tar.gz
       when: remove is undefined
 
     - name: Remove
       shell: |
-        ansible-galaxy remove ansible.kubernetes-modules
-        ansible-galaxy remove ocp.backup_restore
+        {{galaxy.stdout}} remove ansible.kubernetes-modules
+        {{galaxy.stdout}} remove ocp.backup_restore
       when: remove is defined
