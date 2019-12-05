@@ -2,9 +2,23 @@
 - hosts: localhost
   tasks:
     - name: Install ansible.kubernetes-modules package
-      shell: ansible-galaxy install ansible.kubernetes-modules,v0.3.1-6
+      shell: ansible-galaxy install -r {{playbook_dir}}/../requirements.yml
+      when: remove is undefined
 
-- hosts: localhost
-  tasks:
-    - include_role:
-        name: ansible.kubernetes-modules
+    - name: Install python openshift package
+      shell: pip3 install openshift --user
+      when: remove is undefined
+
+    - name: Install ocp.backup_restore collection
+      shell: |
+        ansible-galaxy collection build ocp.backup_restore
+        ansible-galaxy collection install {{playbook_dir}}/../ocp-backup_restore-1.0.0.tar.gz
+      when: remove is undefined
+
+    - name: Fetch a list of namespaces
+      set_fact:
+        projects: "{{ lookup('k8s', api_version='v1', kind='Namespace') }}"
+#- hosts: localhost
+#  tasks:
+#    - include_role:
+#        name: ansible.kubernetes-modules
