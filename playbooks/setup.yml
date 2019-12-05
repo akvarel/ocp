@@ -8,7 +8,7 @@
 - hosts: localhost
   tasks:
     - name: Install ansible.kubernetes-modules package
-      shell: "{{galaxy.stdout}} install -r {{playbook_dir}}/../requirements.yml"
+      shell: "{{galaxy.stdout}} install -r {{playbook_dir}}/../requirements.yml -p {{playbook_dir}}/../roles"
       when: remove is undefined
 
     - name: Install python openshift package
