@@ -22,7 +22,7 @@
       register: projects
 
     - debug:
-        msg: projects
+        msg: "{{projects}}"
 
     - name: Fetch a list of namespaces
       set_fact:
