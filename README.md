@@ -13,8 +13,11 @@ Roles required for operation:
 ````
 oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:glusterfs:robot
 ````
-``inventory/group_vars/api.yml`` contains encrypted by ansible-vault values for OpenShift master API endpoint and token from ``robot`` service account.
-
+``inventory/group_vars/api.yml`` contains encrypted by ansible-vault values for OpenShift master API endpoint and token from ``robot`` service account:
+````
+ansible-vault encrypt_string --stdin-name 'api_token'
+ansible-vault encrypt_string --stdin-name 'master_api'
+````
 Important variables for backup of PV:
 ````
 backup_dir_base
