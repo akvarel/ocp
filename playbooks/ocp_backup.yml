@@ -45,6 +45,8 @@
 - name: fetch tar files from all hosts
   hosts: nodes
   become: true
+  collections:
+    - ocp.backup_restore
   vars:
     destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
   tasks:
