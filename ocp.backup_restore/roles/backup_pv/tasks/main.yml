@@ -27,7 +27,7 @@
     msg: "Total storage nodes: {{ storage_count}}"
 
 - name: Get heketi topology data
-  command: oc rsh {{ heketi_pod.stdout }} heketi-cli topology info --json --user admin --secret {{ heketi_admin_key.stdout }}
+  command: oc rsh {{ heketi_pod.stdout }} heketi-cli topology info --json --user {{userheketi}} --secret {{ heketi_admin_key.stdout }}
   register: topology_raw
 
 - set_fact:
