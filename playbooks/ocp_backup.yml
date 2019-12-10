@@ -4,6 +4,9 @@
 # Run this playbook from a control host:
 # $ ansible-playbook -i inventory ocp_backup.yml
 #
+- name: Run setup
+  import_playbook: setup.yml
+
 - name: backup master hosts
   hosts: masters
   become: true
