@@ -11,11 +11,11 @@
     - ocp.backup_restore
   tasks:
     - import_role:
-        name : backup_etcd
+        name: backup_etcd
     - import_role:
-        name : backup_master
+        name: backup_master
     - import_role:
-        name : compress_backup
+        name: compress_backup
 
 - name: ocp backup of node hosts
   hosts: nodes,!masters
@@ -24,9 +24,9 @@
     - ocp.backup_restore
   tasks:
     - import_role:
-        name : backup_node
+        name: backup_node
     - import_role:
-        name : compress_backup
+        name: compress_backup
 
 - name: Set up directory for fetching tar files
   hosts: localhost

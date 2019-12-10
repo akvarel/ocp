@@ -8,4 +8,6 @@
     remove: no
 
 - name: manually remove data files
-  shell: rm -rf {{ MYBACKUPDIR }}/
+  file:
+    path: "{{ MYBACKUPDIR }}"
+    state: absent

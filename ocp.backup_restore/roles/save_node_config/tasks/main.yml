@@ -20,4 +20,8 @@
   shell: find {{ MYBACKUPDIR }}/etc/sysconfig -type l -exec rm -f {} \;
 
 - name: save registry certificates
-  shell: tar cf {{ MYBACKUPDIR }}/docker-registry-certs.tar /etc/docker/certs.d/*
+  archive:
+    path:
+      - /etc/docker/certs.d/*
+    dest: "{{ MYBACKUPDIR }}/docker-registry-certs.tar"
+    format: tar

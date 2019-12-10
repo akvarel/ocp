@@ -7,7 +7,7 @@
     destination_host_dir: "/tmp/ocp_backup"
   tasks:
     - import_role:
-        name : ping
+        name: ping
 
     - debug:
         msg:

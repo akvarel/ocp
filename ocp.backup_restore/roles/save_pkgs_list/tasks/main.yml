@@ -6,6 +6,7 @@
     state: directory
 
 - name: save a list of installed packages
+  warn: false
   shell: rpm -qa | sort > {{ MYBACKUPDIR }}/installed_packages.txt
 
 - name: save rhsm.conf
