@@ -6,6 +6,8 @@
 #
 - name: Run setup
   import_playbook: setup.yml
+  tags:
+    - setup
 
 - name: backup master hosts
   hosts: masters
