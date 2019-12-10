@@ -7,6 +7,9 @@
 - name: backup master hosts
   hosts: masters
   become: true
+  tags:
+    - master
+    - etcd
   collections:
     - ocp.backup_restore
   tasks:
@@ -20,6 +23,8 @@
 - name: ocp backup of node hosts
   hosts: nodes,!masters
   become: true
+  tags:
+    - node
   collections:
     - ocp.backup_restore
   tasks:
@@ -33,6 +38,9 @@
   collections:
     - ocp.backup_restore
   connection: local
+  tags:
+    - master
+    - node
   vars:
     destination_host_dir: "/tmp/ocp_backup_{{ ansible_date_time.date }}"
   tasks:
@@ -45,6 +53,9 @@
 - name: fetch tar files from all hosts
   hosts: nodes
   become: true
+  tags:
+    - master
+    - node
   collections:
     - ocp.backup_restore
   vars:
@@ -52,6 +63,18 @@
   tasks:
     - import_role:
         name: export_backup
+
+- name: Backup PV
+  hosts: localhost
+  collections:
+    - ocp.backup_restore
+  connection: local
+  tags:
+    - pv
+    - pvc
+  tasks:
+    - import_role:
+        name: backup_pv
 
 ### NOTES ####
 # To enable sync to s3, need the following:

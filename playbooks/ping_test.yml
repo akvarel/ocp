@@ -11,7 +11,7 @@
 
     - debug:
         msg:
-        - "project destination host is {{ destination_host | default(destination_host_default) | default('not found') }}"
-        - "project export destination dir {{ destination_host_dir | default(destination_host_dir_default) | default('not found')}}"
-        - "Date: {{ansible_date_time.epoch}} Full format: {{lookup('pipe','date +%Y%m%d-%H:%M')}}"
+          - "project destination host is {{ destination_host | default(destination_host_default) | default('not found') }}"
+          - "project export destination dir {{ destination_host_dir | default(destination_host_dir_default) | default('not found')}}"
+          - "Date: {{ansible_date_time.epoch}} Full format: {{lookup('pipe','date +%Y%m%d-%H:%M')}}"
 
