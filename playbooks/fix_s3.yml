@@ -1,0 +1,18 @@
+---
+- hosts: masters[0]
+  tasks:
+  - name: Fix s3 certs
+    shell: |
+      oc create secret generic master-pki --from-file=/etc/pki/tls/certs/ca-bundle.crt -n default
+      oc set volumes dc/docker-registry --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki --overwrite -n default
+      oc set volumes dc/registry-console --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki --overwrite -n default
+  - name: Change s3 config file
+    template:
+      src: "{{ inventory_dir }}/../playbooks/templates/s3-config.yml.j2"
+      dest: /tmp/config.yml
+  - name: Delete registry-config secret
+    shell: oc delete secret registry-config
+  - name: Create new registry-config secret
+    shell: |
+      oc create secret generic registry-config --from-file=/tmp/config.yml -n default
+      rm /tmp/config.yml

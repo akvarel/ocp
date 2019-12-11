@@ -1,0 +1,25 @@
+---
+- hosts: masters[0]
+  tasks:
+    - name: Setup namespace
+      shell: oc project openshift-logging
+    - name: Check for master-pki
+      shell: oc get secret master-pki
+      ignore_errors: true
+      register: masterpki
+    - name: Fix logging certs
+      shell: |
+        oc create secret generic master-pki --from-file=/etc/pki/tls/certs/ca-bundle.crt
+        oc set triggers dc/logging-kibana --manual
+        oc set volumes dc/logging-kibana --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki
+      when: masterpki.rc != 0
+    - name: Forward fluentd output into syslog server
+      shell: |
+         oc set env ds logging-fluentd --overwrite REMOTE_SYSLOG_HOST="{{ syslog_url }}" REMOTE_SYSLOG_PORT="{{ syslog_port }}" USE_REMOTE_SYSLOG=true
+    - name: Get no_proxy old value
+      shell: oc get dc logging-kibana -o jsonpath='{..env[?(@.name=="no_proxy")].value}'
+      register: no_proxy
+    - name: Remove proxy
+      shell: |
+        oc set triggers dc/logging-kibana --auto
+        oc set env dc logging-kibana http_proxy- https_proxy- HTTP_PROXY- HTTPS_PROXY-

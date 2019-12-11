@@ -1,2 +1,12 @@
 ---
 # defaults file for backup_pv
+default_storage_namespace: glusterfs
+app: gluster-backup
+heketi_user: admin
+service_name: heketi-storage
+service_account: atlassian
+service_account_group: atlassian
+service_account_uid: 4918
+service_account_gid: 749
+storage_class: glusterfs-storage-backup
+backup_var_file: vars.ini

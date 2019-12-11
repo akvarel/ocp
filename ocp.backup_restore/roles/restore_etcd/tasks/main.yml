@@ -1,2 +1,56 @@
 ---
 # tasks file for restore_etcd
+- name: stop etcdbackup service
+  systemd:
+    name: etcdbackup
+    state: stopped
+    enabled: no
+
+- name: stop etcd-data service
+  systemd:
+    name: etcd-data
+    state: stopped
+    enabled: no
+
+- name: Create dir for pod definitions
+  file:
+    path: /etc/origin/node/pods-stopped
+    state: directory
+
+- name: Remove pod definitions
+  shell: mv /etc/origin/node/pods/* /etc/origin/node/pods-stopped/
+
+- name: restart server
+  shell: 'sleep 1 && shutdown -r now "Reboot triggered by Ansible" && sleep 1'
+  async: 1
+  poll: 0
+  become: true
+
+- name: delete old etcd data
+  file:
+    state: absent
+    path: /var/lib/etcd/*
+
+- name: copy etcd-data
+  shell: cp -R /backup/etcd-*/* /var/lib/etcd/
+
+- name: move db data
+  shell: mv /var/lib/etcd/db /var/lib/etcd/member/snap/db
+
+- name: restore etcd data
+  shell: restorecon -Rv /var/lib/etcd/
+
+- name: remove /etc/origin/node/pods-stopped
+  shell: rm -Rf /etc/origin/node/pods-stopped
+
+# - name: start etcd-data service
+#   systemd:
+#     name: etcd-data
+#     state: started
+#     enabled: yes
+
+# - name: start etcdbackup service
+#   systemd:
+#     name: etcdbackup
+#     state: started
+#     enabled: yes

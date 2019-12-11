@@ -1,0 +1,18 @@
+# cat OCProotCA.crt ca-bundle.crt OCProotCAnopass.key > 0-self-signed.cert
+# oc create configmap custom-cert-fullchain --from-file=0-self-signed.cert
+---
+- hosts: masters[0]
+  tasks:
+    - name: Copy cert
+      copy:
+        src: "{{ inventory_dir }}/cert/0-self-signed.cert"
+        dest: /tmp/0-self-signed.cert
+    - name: Fix registry-console certs
+      shell: |
+        oc create configmap custom-cert-fullchain --from-file=/tmp/0-self-signed.cert -n default
+        oc set triggers dc/registry-console --manual -n default
+        oc set volumes dc/registry-console --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki --overwrite -n default
+        oc set volumes dc/registry-console --add --type=configmap --configmap-name=custom-cert-fullchain --mount-path=/etc/cockpit/ws-certs.d --name=custom-cert-fullchain -n default
+        oc set triggers dc/registry-console --auto -n default
+        oc set env dc registry-console G_MESSAGES_DEBUG=cockpit-ws,cockpit-wrapper -n default
+        rm /tmp/0-self-signed.cert

@@ -6,3 +6,4 @@ userheketi: admin
 snapdir: "/root"
 voldir: "/root"
 vollist: "{{voldir}}/vollist-{{ lookup('pipe', 'date +%Y%m%d-%H:%M') }}.txt"
+storage_namespace: "{{ openshift_storage_glusterfs_namespace | default(default_storage_namespace)}}"

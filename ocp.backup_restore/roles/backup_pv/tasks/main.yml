@@ -3,7 +3,7 @@
 - name: Get OCP api endpoint and set the glusterfs project
   shell: |
     oc login --token={{api_token}} {{master_api}}
-    oc project {{glusterfs_project}}
+    oc project {{storage_namespace}}
 
 - name: Get environment variables
   command: oc get dc heketi-storage -o jsonpath='{..env[?(@.name=="HEKETI_ADMIN_KEY")].value}'
@@ -42,7 +42,7 @@
 #    loop_var: node_item
 
 - name: Connect to heketi-cli and get volumes
-  shell: oc rsh {{ heketi_pod.stdout }} heketi-cli volume list --json --user admin --secret {{ heketi_admin_key.stdout }} | /usr/bin/grep -v block | /usr/bin/grep -v heketidbstorage | /usr/bin/cut -d":" -f4
+  shell: oc rsh {{ heketi_pod.stdout }} heketi-cli volume list --user {{userheketi}} --secret {{ heketi_admin_key.stdout }} | /usr/bin/grep -v block | /usr/bin/grep -v heketidbstorage | /usr/bin/cut -d":" -f4
   register: volumes
 
 - name: Show volumes

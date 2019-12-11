@@ -1,0 +1,12 @@
+---
+- hosts: masters[0]
+  tasks:
+    - name: Check for master-pki
+      shell: oc get secret master-pki -n openshift-monitoring
+      ignore_errors: true
+      register: masterpki
+    - name: Fix metrics certs
+      shell: |
+        oc create secret generic master-pki --from-file=/etc/pki/tls/certs/ca-bundle.crt -n openshift-monitoring
+        oc set volumes statefulset prometheus-k8s --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki --overwrite -n openshift-monitoring
+      when: masterpki.rc != 0

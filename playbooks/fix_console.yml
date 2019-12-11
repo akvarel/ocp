@@ -1,0 +1,8 @@
+---
+- hosts: masters[0]
+  tasks:
+    - name: Fix console certs
+      shell: |
+        oc project openshift-console
+        oc create secret generic master-pki --from-file=/etc/pki/tls/certs/ca-bundle.crt
+        oc set volumes deployment console --add --type=secret --secret-name=master-pki --mount-path=/etc/pki/tls/certs/ --name=master-pki
