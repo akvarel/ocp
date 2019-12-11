@@ -26,4 +26,10 @@ userheketi: admin
 snapdir: "/root"
 voldir: "/root"
 vollist: "{{voldir}}/vollist-{{ lookup('pipe', 'date +%Y%m%d-%H:%M') }}.txt"
+storage_namespace: glusterfs
+````
+
+If you need to create a project request template use this command and then customize the result:
+````
+oc adm create-bootstrap-project-template -o yaml > templates/project-request-template.yaml
 ````
