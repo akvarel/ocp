@@ -1,0 +1,125 @@
+- hosts: masters[0]
+  tasks:
+  - name: Set default
+    shell: oc project default
+
+  - name: Check the service account ldapadmin exists
+    shell: oc get serviceaccount ldapadmin
+    register: sa
+    failed_when: false
+
+  - name: Create service account
+    shell: oc create serviceaccount ldapadmin
+    when: sa.rc != 0
+
+  - name: Add permission to ldapadmin
+    shell: oc adm policy add-cluster-role-to-user cluster-admin -z ldapadmin
+    when: sa.rc != 0
+
+  - name: Create a file for job to sync ldap
+    copy:
+      dest: "/etc/origin/master/syncjob.yaml"
+      content: |
+        apiVersion: batch/v1beta1
+        kind: CronJob
+        metadata:
+          name: syncldap
+        spec:
+          schedule: "*/30 * * * *"
+          successfulJobsHistoryLimit: 3
+          failedJobsHistoryLimit: 1
+          ConcurrencyPolicy: Replace
+          jobTemplate:
+            spec:
+              template:
+                metadata:
+                  labels:
+                    parent: "cronjobsyncldap"
+                spec:
+                  containers:
+                  - name: oc
+                    image: {{ company_registry }}/openshift3/ose-cli
+                    command:
+                      - "/bin/bash"
+                      - "-c"
+                      - |
+                        cat <<EOF >/tmp/groupsync.yaml
+                        kind: LDAPSyncConfig
+                        apiVersion: v1
+                        url: "{{ ldap_url }}" 
+                        bindDN: "{{ dn }}"
+                        bindPassword: "{{ bind_pw }}"
+                        insecure: true 
+                        groupUIDNameMapping:
+                          "{{ group_search }}": Administrators 
+                        rfc2307:
+                            groupsQuery:
+                                baseDN: "{{ group_search }}"
+                                scope: sub
+                                filter: (objectClass=*)
+                                derefAliases: never
+                                pageSize: 0
+                            groupUIDAttribute: dn 
+                            groupNameAttributes: [ cn ] 
+                            groupMembershipAttributes: [ member ]
+                            usersQuery:
+                                baseDN: "{{ base_search }}"
+                                scope: sub
+                                derefAliases: never
+                                pageSize: 0
+                            userUIDAttribute: dn 
+                            userNameAttributes: [ uid ]
+                            tolerateMemberNotFoundErrors: true
+                            tolerateMemberOutOfScopeErrors: true
+                        EOF
+                        oc adm groups sync --sync-config=/tmp/groupsync.yaml --confirm
+                        echo "Sync complete"
+                  restartPolicy: OnFailure
+                  serviceAccountName: "ldapadmin"
+                  serviceAccount: "ldapadmin"
+
+  - name: Check cronjob already exists
+    shell: oc get cronjob syncldap
+    register: cron
+    failed_when: false
+
+  - name: Delete old cronjob
+    shell: oc delete cronjob syncldap
+    when: cron.rc == 0
+
+  - name: Create a job to sync ldap
+    shell: oc create -f /etc/origin/master/syncjob.yaml
+
+  - name: Create groupsync.yaml file on master
+    copy:
+      dest: "/etc/origin/master/groupsync.yaml"
+      content: |
+        kind: LDAPSyncConfig
+        apiVersion: v1
+        url: "{{ ldap_url }}" 
+        bindDN: "{{ dn }}"
+        bindPassword: "{{ bind_pw }}"
+        insecure: true 
+        groupUIDNameMapping:
+          "{{ group_search }}": Administrators 
+        rfc2307:
+            groupsQuery:
+                baseDN: "{{ group_search }}"
+                scope: sub
+                filter: (objectClass=*)
+                derefAliases: never
+                pageSize: 0
+            groupUIDAttribute: dn 
+            groupNameAttributes: [ cn ] 
+            groupMembershipAttributes: [ member ]
+            usersQuery:
+                baseDN: "{{ base_search }}"
+                scope: sub
+                derefAliases: never
+                pageSize: 0
+            userUIDAttribute: dn 
+            userNameAttributes: [ uid ]
+            tolerateMemberNotFoundErrors: true
+            tolerateMemberOutOfScopeErrors: true
+  - name: Run sync of groups and users
+    shell: oc adm groups sync --sync-config=/etc/origin/master/groupsync.yaml --confirm
