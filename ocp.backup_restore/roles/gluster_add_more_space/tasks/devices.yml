@@ -1,0 +1,52 @@
+# Node specific tasks
+- name: Process device
+  block:
+    - name: Disable device
+      command: oc rsh {{ heketi_pod.stdout }} heketi-cli device disable {{device.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+      register: dev_dis
+
+    - name: Wait for device disabled
+      wait_for:
+        timeout: 15
+
+    - name: Remove/release device
+      command: oc rsh {{ heketi_pod.stdout }} heketi-cli device remove {{device.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+      register: dev_rem
+      until: dev_rem.rc == 0
+      retries: 10
+      delay: 10
+
+    - name: Wait for volume removed/released
+      wait_for:
+        timeout: 15
+
+    - include_tasks: delete-device.yml
+
+    - name: Wait for volume deleted
+      command: vgdisplay vg_{{device.id}}
+      delegate_to: "{{node_item.hostnames.manage[0]}}"
+      register: vgdisplay
+      until: vgdisplay.rc != 0
+      retries: 5
+      delay: 10
+      ignore_errors: true
+      failed_when: false
+
+    - name: Add device
+      command: oc rsh {{ heketi_pod.stdout }} heketi-cli device add --name {{device.name}} --node {{node_item.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+      register: dev_add
+      until: dev_add.rc == 0
+      retries: 5
+      delay: 10
+
+    - name: Wait for healing device
+      command: oc rsh {{ storage[0] }} gluster volume list
+      register: volumes
+      until: volumes.rc == 0
+      retries: 5
+      delay: 10
+
+    - include_tasks: volume.yml
+      loop: "{{ volumes.stdout_lines }}"
+      loop_control:
+        loop_var: volume_item

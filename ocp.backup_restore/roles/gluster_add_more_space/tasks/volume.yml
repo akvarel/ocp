@@ -1,0 +1,8 @@
+---
+- name: Heal volume
+  command: oc rsh {{ storage[0] }} gluster vol heal {{ volume_item }} info
+  register: heal_res
+  until: heal_res.stdout is not search('Number of entries. [1-9]+')
+  retries: 50
+  delay: 10
+

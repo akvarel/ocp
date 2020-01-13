@@ -1,0 +1,39 @@
+---
+- name: Set storage project
+  command: oc project openshift-storage
+
+- name: Get environment variables
+  command: oc get dc heketi-storage -o jsonpath='{..env[?(@.name=="HEKETI_ADMIN_KEY")].value}'
+  register: heketi_admin_key
+
+- name: Get heketi pod
+  command: oc get pods --selector=deploymentconfig=heketi-storage -o name
+  register: heketi_pod
+
+- name: Get gluster storage pod
+  command: oc get pods -o name --selector=glusterfs=storage-pod
+  register: storage_pods
+
+- set_fact:
+    storage: "{{ storage_pods.stdout_lines }}"
+
+- set_fact:
+    storage_count: "{{ storage_pods.stdout.split()|length }}"
+
+- debug:
+    msg: "Total storage nodes: {{ storage_count}}"
+
+- name: Get heketi topology data
+  command: oc rsh {{ heketi_pod.stdout }} heketi-cli topology info --json --user admin --secret {{ heketi_admin_key.stdout }}
+  register: topology_raw
+
+- set_fact:
+    topology: "{{ topology_raw.stdout|from_json }}"
+
+- set_fact:
+    nodes: "{{ topology.clusters[0]['nodes'] }}"
+
+- include_tasks: nodes.yml
+  loop: "{{nodes}}"
+  loop_control:
+    loop_var: node_item  

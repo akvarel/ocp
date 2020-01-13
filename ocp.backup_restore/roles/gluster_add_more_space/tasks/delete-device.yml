@@ -1,0 +1,84 @@
+---
+# Delete device tasks
+- name: Delete device
+  command: oc rsh {{ heketi_pod.stdout }} heketi-cli device delete {{device.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+  register: dev_del
+  until: dev_del.rc == 0
+  retries: 5
+  delay: 10
+  failed_when: false
+
+- name: Reboot glusterfs node
+  shell: sleep 2 && shutdown -r now "Ansible triggered reboot"
+  delegate_to: "{{node_item.hostnames.manage[0]}}"
+  async: 1
+  poll: 0
+  ignore_errors: true
+  when: dev_del.rc != 0
+
+- name: Wait for the server to finish rebooting
+  wait_for: 
+    host: "{{ node_item.hostnames.manage[0] }}" 
+    search_regex: OpenSSH 
+    port: 22 
+    timeout: 300 
+    delay: 60
+  delegate_to: localhost
+  when: dev_del.rc != 0
+
+- name: Wait for all storage pods are up and running
+  shell: oc get pods --selector glusterfs=storage-pod --field-selector=status.phase=Running -o jsonpath='{..ready}'
+  register: pod
+  until: (pod.stdout|regex_findall('true')|length) == storage_count|int
+  delay: 15
+  retries: 40
+
+- name: Delete volume group
+  command: vgremove -f -y vg_{{device.id}}
+  delegate_to: "{{node_item.hostnames.manage[0]}}"
+  register: vgremove
+  failed_when: false
+  when: dev_del.rc != 0
+
+- debug:
+    msg: "{{vgremove.stderr}}"
+  when: dev_del.rc != 0 and vgremove is defined and vgremove.rc != 0
+
+- name: Wait for delete volume group
+  command: vgdisplay vg_{{device.id}}
+  delegate_to: "{{node_item.hostnames.manage[0]}}"
+  register: vgdisplay
+  until: vgdisplay.rc != 0
+  retries: 5
+  delay: 10
+  ignore_errors: true
+  failed_when: false
+  when: dev_del.rc != 0
+
+- name: Re-create a volume group
+  command: vgcreate vg_{{device.id}} {{device.name}}
+  delegate_to: "{{node_item.hostnames.manage[0]}}"
+  when: dev_del.rc != 0
+
+- name: Wait for create volume group
+  command: vgdisplay vg_{{device.id}}
+  delegate_to: "{{node_item.hostnames.manage[0]}}"
+  register: vgdisplay
+  until: vgdisplay.rc == 0
+  retries: 5
+  delay: 10
+  when: dev_del.rc != 0
+
+- name: Wait for volume created
+  wait_for:
+    timeout: 5
+  when: dev_del.rc != 0
+
+- name: Repeat delete device
+  command: oc rsh {{ heketi_pod.stdout }} heketi-cli device delete {{device.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+  register: dev_del_second_try
+  until: dev_del_second_try.rc == 0
+  retries: 5
+  delay: 10
+  when: dev_del.rc != 0
+  

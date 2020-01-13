@@ -1,0 +1,9 @@
+---
+# vim: ft=ansible
+- hosts: masters
+  become: true
+  run_once: true
+  collections:
+    - ocp.backup_restore
+  roles:
+    - gluster_add_more_space

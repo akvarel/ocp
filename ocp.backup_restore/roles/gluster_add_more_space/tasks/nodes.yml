@@ -1,0 +1,15 @@
+# Node specific tasks
+- name: Get node devices
+  block:
+    - set_fact:
+        devices: "{{node_item.devices}}"
+    - name: Disable device
+      command: oc rsh {{ heketi_pod.stdout }} heketi-cli device disable {{item.id}} --user admin --secret {{ heketi_admin_key.stdout }}
+      loop: "{{ devices }}"
+      register: dev_dis
+    - include_tasks: devices.yml
+      loop: "{{ devices }}"
+      loop_control:
+        loop_var: device
+
+
