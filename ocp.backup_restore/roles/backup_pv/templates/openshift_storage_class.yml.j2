@@ -1,0 +1,14 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ storage_class }}
+parameters:
+  resturl: http://heketi-storage.{{storage_namespace}}.svc:8080
+  restuser: admin
+  secretName: heketi-storage-admin-secret
+  secretNamespace: {{storage_namespace}}
+  volumenameprefix: backup
+provisioner: kubernetes.io/glusterfs
+reclaimPolicy: Delete
+volumeBindingMode: Immediate

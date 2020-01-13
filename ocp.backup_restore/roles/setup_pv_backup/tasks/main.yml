@@ -1,0 +1,53 @@
+---
+# tasks file for setup_pv_backup
+- name: Check for StorageClass
+  shell: |
+    oc get storageclass -o jsonpath='{.items[?(.metadata.name=="{{ storage_class }}")].metadata.name}'
+  register: storageclass
+  changed_when: false
+  delegate_to: "{{ groups.masters|random }}"
+  run_once: true
+
+- name: upload temp files
+  template:
+    src: openshift_storage_class.yml.j2
+    dest: /tmp/openshift_storage_class.yml
+    mode: 0440
+  delegate_to: "{{ groups.masters[0] }}"
+  run_once: true
+  when: not storageclass.stdout == storage_class
+
+- name: Create StorageClass
+  shell: |
+    cat /tmp/openshift_storage_class.yml | oc create -f -
+  delegate_to: "{{ groups.masters[0] }}"
+  run_once: true
+  when: not storageclass.stdout == storage_class
+
+- name: Clean up temp files
+  file:
+    state: absent
+    path: /tmp/openshift_storage_class.yml
+  delegate_to: "{{ groups.masters[0] }}"
+  run_once: true
+
+- name: Check for serviceaccount
+  shell: |
+    oc get serviceaccount -o jsonpath='{.items[?(.metadata.name=="{{ app }}")].metadata.name}' -n {{ namespace }}
+  register: serviceaccount
+  changed_when: false
+  delegate_to: "{{ groups.masters|random }}"
+  run_once: true
+
+- name: Create serviceaccount
+  shell: |
+    oc create serviceaccount {{ app }} -n {{ namespace }}
+  delegate_to: "{{ groups.masters|random }}"
+  run_once: true
+  when: not serviceaccount.stdout == app
+
+- name: Add edit permission
+  shell: |
+    oc adm policy add-role-to-user edit -z {{ app }} -n {{ namespace }}
+  delegate_to: "{{ groups.masters|random }}"
+  run_once: true
