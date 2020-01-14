@@ -17,13 +17,17 @@
 
     - name: Install ocp.backup_restore collection
       shell: |
-        {{galaxy.stdout}} collection build {{playbook_dir}}/../ocp.backup_restore
+        {{galaxy.stdout}} collection build {{playbook_dir}}/../ocp.backup_restore --force
         {{galaxy.stdout}} collection install ocp-backup_restore-1.0.0.tar.gz --force
+        {{galaxy.stdout}} collection build {{playbook_dir}}/../ocp.health_check --force
+        {{galaxy.stdout}} collection install ocp-health_check-1.0.0.tar.gz --force
         rm ocp-backup_restore-1.0.0.tar.gz
+        rm ocp-health_check-1.0.0.tar.gz
       when: remove is undefined
 
     - name: Remove
       shell: |
         {{galaxy.stdout}} remove ansible.kubernetes-modules
         {{galaxy.stdout}} remove ocp.backup_restore
+        {{galaxy.stdout}} remove ocp.health_check
       when: remove is defined
