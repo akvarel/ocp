@@ -7,7 +7,6 @@
   run_once: true
   vars:
     namespace: "app-health-check"
-    gitrepo: "https://github.com/akvarel/php-apache.git"
     builder: "centos/php-72-centos7"
     sample: "httpd-example"
     contextdir: "."

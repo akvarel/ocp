@@ -16,8 +16,32 @@
     when: "namespace not in projects.stdout"
 
   - name: Create Application in {{ namespace }}
-    shell: oc new-app --name={{ sample }} {{ builder }}~{{ gitrepo }} --context-dir={{ contextdir }} -n {{ namespace }}
-    run_once: true
+    block:
+    - name: Copy over build-config template
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { src: 'templates/build-config.j2' , dest: '/tmp/build-config.yaml' }
+        - { src: 'templates/deployment-config.j2' , dest: '/tmp/deployment-config.yaml' }
+      run_once: true
+
+    - name: Make a build
+      shell: oc create -f {{ item }} -n {{ namespace }}
+      with_items:
+        - /tmp/build-config.yaml
+        - /tmp/deployment-config.yaml
+      run_once: true
+    always:
+    - name: Delete template
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /tmp/build-config.yaml
+        - /tmp/deployment-config.yaml
+      ignore_errors: true
+      run_once: true
 
   - name: Check deployment status
     shell: oc rollout status deploymentconfig {{ sample }} -n {{ namespace }} 
