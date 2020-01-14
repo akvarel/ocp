@@ -4,3 +4,6 @@ backup_dir_base_default: "/root/ocp_backup"
 destination_host_dir_default: "~/ocp_backup"
 glusterfs_project: glusterfs
 company_registry: registry.redhat.io
+grusterfs_devices_default:
+  - /dev/sdb
+  - /dev/sdc
