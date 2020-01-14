@@ -7,3 +7,5 @@ company_registry: registry.redhat.io
 glusterfs_devices:
   - /dev/sdb
   - /dev/sdc
+glusterfs_devices_default:
+  - /dev/sdd
