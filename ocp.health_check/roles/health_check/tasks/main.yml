@@ -27,7 +27,7 @@
       run_once: true
 
     - name: Delete all objects
-      shell: oc delete all -l app={{sample}}
+      shell: oc delete all -l app={{sample}} --grace-period=5
       run_once: true
       ignore_errors: true
 
