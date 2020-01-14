@@ -2,10 +2,13 @@
 - import_playbook: /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
 
 - hosts: glusterfs
+  vars:
+    glusterfs_devices_default:
+      - /dev/sdb
   tasks:
     - name: remove volumes
       shell: "lvremove -y /dev/vg_*"
     - name: clear gluster hard drives
       shell: dd if=/dev/zero of={{item}} bs=1k count=1024
-      with_items:
-        - /dev/sdd
+      with_items: "{{ glusterfs_devices | default(glusterfs_devices_default) | list }}"
+

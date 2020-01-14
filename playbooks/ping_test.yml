@@ -5,6 +5,8 @@
     - ocp.backup_restore
   vars:
     destination_host_dir: "/tmp/ocp_backup"
+    glusterfs_devices_default:
+      - /dev/sdb
   tasks:
 
     - debug:
