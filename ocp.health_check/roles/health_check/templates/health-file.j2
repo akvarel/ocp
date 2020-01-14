@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: health-file
+  namespace: {{ namespace }}
+spec:
+  accessModes:
+  - ReadWriteMany
+  storageClassName: glusterfs-storage
+  resources:
+    requests:
+      storage: 1Gi

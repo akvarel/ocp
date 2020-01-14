@@ -5,5 +5,6 @@
   run_once: true
   collections:
     - ocp.backup_restore
-  roles:
-    - gluster_add_more_space
+  tasks:
+    - import_role:
+        name: gluster_add_more_space

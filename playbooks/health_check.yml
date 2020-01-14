@@ -1,0 +1,19 @@
+---
+# vim: ft=ansible
+# Cluster openshift-health check playbook for OCP installation
+
+- hosts: localhost
+  become: false
+  run_once: true
+  vars:
+    namespace: "app-health-check"
+    gitrepo: "https://github.com/akvarel/php-apache.git"
+    builder: "centos/php-72-centos7"
+    sample: "httpd-example"
+    contextdir: "."
+    domain: "{{ openshift_master_default_subdomain | default(local) }}"
+  collections:
+    - ocp.health_check
+  tasks:
+    - import_role:
+        name: health_check

@@ -1,0 +1,196 @@
+---
+- name: Check if namespace exist
+  shell: oc get projects -o jsonpath='{.items[*].metadata.name}'
+  register: projects
+
+- name: Get ocp server
+  shell: oc whoami --show-server
+  register: ocp_server
+
+- name: Run project tests
+  block:
+
+  - name: Create Project {{ namespace }}
+    shell: oc new-project {{ namespace }} 
+    run_once: true
+    when: "namespace not in projects.stdout"
+
+  - name: Create Application in {{ namespace }}
+    shell: oc new-app --name={{ sample }} {{ builder }}~{{ gitrepo }} --context-dir={{ contextdir }} -n {{ namespace }}
+    run_once: true
+
+  - name: Check deployment status
+    shell: oc rollout status deploymentconfig {{ sample }} -n {{ namespace }} 
+    async: 600
+    poll: 15
+    failed_when: false
+    run_once: true
+
+  - name: Pool for Health Check Deployment success
+    shell: oc get rc -o jsonpath='{ ..metadata.annotations.openshift\.io/deployment\.phase }'  -n {{ namespace }}
+    register: httpd_run
+    until: "'Running' not in httpd_run.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in httpd_run.stdout"
+    run_once: true
+
+  - name: Create route
+    shell: oc create route edge --service={{ sample }}
+    run_once: true
+
+  - name: Wait for api server to be ready
+    command: >
+      curl -k -s https://{{ sample }}-{{ namespace }}.{{ domain }}
+    args:
+      warn: no
+    register: api_health
+    until: api_health.stdout.find('Hello!') != -1
+    retries: 30
+    delay: 3
+    changed_when: false
+
+  - name: Create storage from template
+    block:
+    - name: Copy over pvc template to check file storage
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { src: 'templates/health-file.j2' , dest: '/tmp/health-file.yaml' }
+        - { src: 'templates/health-block.j2' , dest: '/tmp/health-block.yaml' }
+      run_once: true
+
+    - name: Create storage
+      shell: oc create -f {{ item }} -n {{ namespace }}
+      with_items: 
+        - /tmp/health-file.yaml
+        - /tmp/health-block.yaml
+      run_once: true
+
+    always:
+    - name: Delete templates
+      file:
+          path: "{{ item }}"
+          state: absent
+      with_items:
+          - /tmp/health-file.yaml
+          - /tmp/health-block.yaml
+      ignore_errors: true
+      run_once: true
+
+  - name: Check for PVC Bound state file-storage
+    shell: oc get pvc health-file -o jsonpath='{ .status.phase }' -n {{ namespace }}
+    register: file_run
+    until: "'Pending' not in file_run.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in file_run.stdout"
+    run_once: true
+
+  - name: Check for PVC Bound state file-storage
+    shell: oc get pvc health-block -o jsonpath='{ .status.phase }' -n {{ namespace }}
+    register: block_run
+    until: "'Pending' not in block_run.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Failed' in block_run.stdout"
+    run_once: true
+
+  - name: Create php file from template
+    block:
+    - name: Create temporary directory for php
+      file:
+        path: /tmp/{{namespace}}/php
+        state: directory
+        mode: 0777
+    - name: Copy over php template to check PVC usage
+      template:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+      with_items:
+        - { src: 'templates/health-php.j2' , dest: '/tmp/{{namespace}}/php/index.php' }
+      run_once: true
+
+    - name: Attach PVC to the pod
+      shell: |
+        oc set volume dc/{{ sample }} --add --name=tmp-mount --claim-name=health-file --type pvc --mount-path /opt/app-root/src
+      run_once: true
+
+    - name: Wait for rollout
+      shell: oc rollout status deploymentconfig {{ sample }} -n {{ namespace }}
+      async: 600
+      poll: 15
+      failed_when: false
+      run_once: true
+
+    - name: Check pod terminating
+      shell: oc get rc -o jsonpath='{ ..metadata.annotations.openshift\.io/deployment\.phase }' -n {{ namespace }}
+      register: pod_run
+      until: "'Running' not in pod_run.stdout"
+      delay: 15
+      retries: 40
+      failed_when: "'Failed' in pod_run.stdout"
+      run_once: true
+
+    - name: Get pod name
+      shell: oc get pods --selector app={{ sample }} --field-selector=status.phase=Running -o jsonpath='{..metadata.name}' -n {{ namespace }}
+      register: pod
+      until: pod.stdout.split()|length == 1
+      delay: 15
+      retries: 40
+      run_once: true
+
+    - name: Copy files into pod
+      shell: oc rsync {{ item }} {{pod.stdout}}:/opt/app-root/src --strategy=tar -n {{ namespace }}
+      with_items:
+        - /tmp/{{namespace}}/php/
+      run_once: true
+
+    - name: Check PHP verstion
+      command: >
+        curl -k -s https://{{ sample }}-{{ namespace }}.{{ domain }}
+      args:
+        warn: no
+      register: api_health
+      until: api_health.stdout.find("PHP Version") != -1
+      retries: 30
+      delay: 3
+      changed_when: false
+      run_once: true
+
+    - debug:
+        msg: "{{ api_health.stdout | regex_findall(regex) }}"
+      vars:
+        regex: "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b"
+      run_once: true
+
+    - name: Remove PVC
+      shell: oc set volume dc/{{ sample }} --remove --name=tmp-mount
+      run_once: true
+
+    always:
+    - name: Delete templates
+      file:
+          path: "{{ item }}"
+          state: absent
+      with_items:
+          - /tmp/{{namespace}}
+      ignore_errors: true
+      run_once: true
+
+  always:
+
+  - name: Delete {{ namespace }} project
+    shell: oc delete project {{ namespace }}
+    ignore_errors: yes
+    run_once: true
+
+  - name: Check project is deleted
+    shell: oc get project {{ namespace }} -o jsonpath='{ .status.phase }'
+    register: project_run
+    until: "'Terminating' not in project_run.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Active' in project_run.stdout"
+    run_once: true
