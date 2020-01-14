@@ -6,8 +6,6 @@
   vars:
     destination_host_dir: "/tmp/ocp_backup"
   tasks:
-    - import_role:
-        name: ping
 
     - debug:
         msg:
@@ -19,3 +17,5 @@
           - "Drives: {{item}}"
       with_items: "{{ glusterfs_devices | default(glusterfs_devices_default) | list }}"
 
+    - import_role:
+        name: ping
