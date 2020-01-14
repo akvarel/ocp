@@ -1,6 +1,5 @@
 [masters]
 localhost
-accounting.toposoft.lv
 
 [nodes]
 localhost
