@@ -211,7 +211,9 @@
   always:
 
   - name: Delete {{ namespace }} project
-    shell: oc delete project {{ namespace }}
+    shell: |
+      shell: oc delete all -l app={{sample}} --grace-period=5
+      oc delete project {{ namespace }} --grace-period=5
     ignore_errors: yes
     run_once: true
 
