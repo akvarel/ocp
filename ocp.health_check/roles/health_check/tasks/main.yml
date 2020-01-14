@@ -26,6 +26,11 @@
         - { src: 'templates/deployment-config.j2' , dest: '/tmp/deployment-config.yaml' }
       run_once: true
 
+    - name: Delete all objects
+      shell: oc delete all -l app={{sample}}
+      run_once: true
+      ignore_errors: true
+
     - name: Make a build
       shell: oc create -f {{ item }} -n {{ namespace }}
       with_items:
