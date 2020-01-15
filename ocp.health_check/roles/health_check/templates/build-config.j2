@@ -8,11 +8,12 @@ spec:
     dockerfile: |
       FROM php:7.2-apache
       RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > /var/www/html/index.html
+      RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > /opt/index.html
   strategy:
     sourceStrategy:
       from:
         kind: "ImageStreamTag"
-        name: "centos/php-72-centos7:latest"
+        name: "php-72-centos7:latest"
   output:
     to:
       kind: "ImageStreamTag"
