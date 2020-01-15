@@ -5,5 +5,6 @@
   serial: 1
   collections:
     - ocp.backup_restore
-  roles:   
-    - managed_reboot
+  tasks:
+    - import_role:
+        name: managed_reboot
