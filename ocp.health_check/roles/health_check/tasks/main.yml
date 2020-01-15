@@ -24,6 +24,7 @@
       with_items:
         - { src: 'templates/build-config.j2' , dest: '/tmp/build-config.yaml' }
         - { src: 'templates/deployment-config.j2' , dest: '/tmp/deployment-config.yaml' }
+        - { src: 'templates/image-stream.j2' , dest: '/tmp/image-stream.yaml' }
       run_once: true
 
     - name: Delete all objects
@@ -36,6 +37,7 @@
       with_items:
         - /tmp/build-config.yaml
         - /tmp/deployment-config.yaml
+        - /tmp/image-stream.yaml
       run_once: true
     - name: Start a build
       shell: oc start-build {{sample}}-build --wait
