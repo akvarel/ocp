@@ -49,6 +49,7 @@
       with_items:
         - /tmp/build-config.yaml
         - /tmp/deployment-config.yaml
+        - /tmp/image-stream.yaml
       ignore_errors: true
       run_once: true
 
