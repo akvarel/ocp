@@ -31,12 +31,14 @@
       run_once: true
       ignore_errors: true
 
-    - name: Make a build
+    - name: Create the build and deployment configs
       shell: oc create -f {{ item }} -n {{ namespace }}
       with_items:
         - /tmp/build-config.yaml
         - /tmp/deployment-config.yaml
       run_once: true
+    - name: Start a build
+      shell: oc start-build {{sample}}-build --wait
     always:
     - name: Delete template
       file:
