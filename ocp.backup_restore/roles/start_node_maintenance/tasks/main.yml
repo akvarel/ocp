@@ -1,0 +1,60 @@
+- name: Register scheduling status
+  shell: oc get nodes {{ inventory_hostname }} | grep -q SchedulingDisabled
+  delegate_to: "{{ groups.masters[0] }}"
+  register: scheduling_disabled
+  changed_when: false
+  failed_when: false
+
+- name: Set scheduling fact
+  set_fact: schedulable={{ true if scheduling_disabled.rc == 1 else false }}
+
+- name: Drain node
+  command: oc adm drain --delete-local-data --ignore-daemonsets {{ inventory_hostname }}
+  delegate_to: "{{ groups.masters[0] }}"
+
+- name: Stop gluster pod 
+  block:
+    - name: Get gluster pod
+      shell: oc get pods -o wide -n {{ openshift_storage_glusterfs_namespace }} | grep "{{ inventory_hostname }}" | awk '{ print $1 }'
+      delegate_to: "{{ groups.masters[0] }}"
+      register: gluster_pod
+
+    - name: Stop gluster on storage node
+      command: oc label node {{ inventory_hostname }} node-role.kubernetes.io/storage= --overwrite
+      delegate_to: "{{ groups.masters[0] }}"
+  
+    - name: Wait for glusterfs pod to terminate
+      command: oc get pods -n {{ openshift_storage_glusterfs_namespace }} -o jsonpath={.items[*].metadata.name}
+      delegate_to: "{{ groups.masters[0] }}"
+      register: gluster_terminated    
+      retries: 30
+      delay: 15
+      until: gluster_pod.stdout not in gluster_terminated.stdout
+      when: gluster_pod.stdout != ''
+  when: inventory_hostname in groups.glusterfs
+
+- name: Stop logging pod
+  # https://access.redhat.com/solutions/3785481
+  # https://access.redhat.com/solutions/3368761
+  block:
+    - name: Stop logging
+      command: oc label node {{ inventory_hostname }} logging-infra-fluentd=false --overwrite
+      delegate_to: "{{ groups.masters[0] }}"
+
+    - name: Get logging pod
+      shell: oc get pods -o wide -n openshift-logging | grep logging-fluentd | grep "{{ inventory_hostname }}" | awk '{ print $1 }'
+      delegate_to: "{{ groups.masters[0] }}"
+      register: logging_pod
+
+    - name: Stop logging on node
+      command: oc label node {{ inventory_hostname }} logging-infra-fluentd=false --overwrite
+      delegate_to: "{{ groups.masters[0] }}"
+
+    - name: Wait for logging pod to terminate
+      command: oc get pods -n openshift-logging -o jsonpath={.items[*].metadata.name}
+      delegate_to: "{{ groups.masters[0] }}"
+      register: logging_terminated
+      retries: 30
+      delay: 5
+      until: logging_pod.stdout not in logging_terminated.stdout
+      when: logging_pod.stdout != ''

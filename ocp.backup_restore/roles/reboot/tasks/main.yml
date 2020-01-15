@@ -1,0 +1,23 @@
+---
+- name: Reboot system
+  shell: sleep 5 && shutdown -r now "OpenShift Ansible rolling restart"
+  async: 1
+  poll: 0
+  ignore_errors: true
+
+- debug: msg="{{ inventory_hostname }}"
+
+- name: Wait for the server to finish rebooting
+  wait_for: 
+    host: "{{ inventory_hostname }}" 
+    search_regex: OpenSSH 
+    port: 22 
+    timeout: 300 
+    delay: 60
+  vars:
+    ansible_connection: local
+
+# Try to work around restart bug. https://access.redhat.com/support/cases/#/case/02298295
+- pause:
+    seconds: 120
+  when: inventory_hostname in groups.masters

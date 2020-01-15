@@ -1,0 +1,55 @@
+# XXX Avoid shell/grep
+# oc get node node.example.com -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}{"\n"}'
+- name: Wait for node to become ready
+  shell: oc get nodes {{ inventory_hostname }} | grep -q " Ready"
+  delegate_to: "{{ groups.masters[0] }}"
+  register: node_online
+  until: node_online is success
+  retries: 30
+  delay: 10
+
+- name: Start logging
+  command: oc label node {{ inventory_hostname }} logging-infra-fluentd=true --overwrite
+  delegate_to: "{{ groups.masters[0] }}"
+
+#if Gluster node
+- name: start gluster pod and heal volumes
+  block: 
+    - name: start gluster on storage node
+      command: oc label node {{ inventory_hostname }} node-role.kubernetes.io/storage=true --overwrite
+      delegate_to: "{{ groups.masters[0] }}"
+
+    - name: wait for gluster to be in ready state
+      shell: oc get pods -o wide -l glusterfs=storage-pod -n {{ openshift_storage_glusterfs_namespace }} | grep {{ inventory_hostname }} | grep '1/1'
+      delegate_to: "{{ groups.masters[0] }}"
+      register: gluster_pod_ready
+      until: gluster_pod_ready is success
+      retries: 30
+      delay: 15
+
+    - name: switch to gluster project
+      command: oc project {{ openshift_storage_glusterfs_namespace }}
+      delegate_to: "{{ groups.masters[0] }}"
+
+    - name: get gluster pod
+      shell: oc get pods -o wide -n {{ openshift_storage_glusterfs_namespace }} | grep "{{ inventory_hostname }}" | awk '{ print $1 }'
+      delegate_to: "{{ groups.masters[0] }}"
+      register: gluster_pod
+
+    - name: heal gluster volumes
+      command: oc exec {{ gluster_pod.stdout }} -- bash -c 'for vol in $(/usr/sbin/gluster volume list); do /usr/sbin/gluster volume heal $vol info; done'
+      when: inventory_hostname in groups.glusterfs
+      delegate_to: "{{ groups.masters[0] }}"
+      register: heal
+
+    - debug: var=heal
+  when: inventory_hostname in groups.glusterfs
+#End if Gluster node    
+
+- name: Enable scheduling
+  command: oc adm uncordon {{ inventory_hostname }}
+  delegate_to: "{{ groups.masters[0] }}"
+  when: schedulable or schedulable is undefined
+
+- name: Wait for node to calm down
+  pause: seconds=10

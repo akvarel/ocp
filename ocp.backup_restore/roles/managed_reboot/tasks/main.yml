@@ -1,0 +1,9 @@
+---
+- include_role:
+    name: start_node_maintenance
+
+- include_role:
+    name: reboot
+
+- include_role:
+    name: stop_node_maintenance

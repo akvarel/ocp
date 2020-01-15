@@ -1,0 +1,9 @@
+- name: Reboot all nodes
+  hosts: nodes
+  become: true
+  any_errors_fatal: true
+  serial: 1
+  collections:
+    - ocp.backup_restore
+  roles:   
+    - managed_reboot

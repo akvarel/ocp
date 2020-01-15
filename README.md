@@ -1,4 +1,11 @@
 # ocp
+## Prerequisites
+### Ansible 2.9
+On RedHat system enable repo:
+````
+subscription-manager repos --enable="rhel-7-server-ansible-2.9-rpms"
+yum install ansible
+````
 This is repository for various ansible playbooks and roles required for day2 operation of OpenShift
 
 Before you can use this collection you need to install roles and collections:
