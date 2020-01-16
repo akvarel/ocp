@@ -52,6 +52,13 @@
       run_once: true
     - name: Process template
       shell: oc process health-check-template | oc create -f -
+    - name: Check image is available
+      shell: sleep 20
+#      async: 600
+#      poll: 15
+#      failed_when: false
+      run_once: true
+
     - name: Start a build
       shell: oc start-build {{sample}}-build --wait
 
