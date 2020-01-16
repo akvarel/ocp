@@ -194,30 +194,30 @@
       shell: oc set volume dc/{{ sample }} --remove --name=tmp-mount
       run_once: true
 
-#  always:
-#
-#  - name: Delete {{ namespace }} project
-#    shell: |
-#      oc delete all -l app={{sample}} --grace-period=5
-#      oc delete template health-check-template
-#      oc delete project {{ namespace }} --grace-period=5
-#    ignore_errors: yes
-#    run_once: true
-#
-#  - name: Check project is deleted
-#    shell: oc get project {{ namespace }} -o jsonpath='{ .status.phase }'
-#    register: project_run
-#    until: "'Terminating' not in project_run.stdout"
-#    delay: 15
-#    retries: 40
-#    failed_when: "'Active' in project_run.stdout"
-#    run_once: true
-#
-#  - name: Delete templates
-#    file:
-#      path: "{{ item }}"
-#      state: absent
-#    with_items:
-#      - /tmp/{{namespace}}
-#    ignore_errors: true
-#    run_once: true
+  always:
+
+  - name: Delete {{ namespace }} project
+    shell: |
+      oc delete all -l app={{sample}} --grace-period=5
+      oc delete template health-check-template
+      oc delete project {{ namespace }} --grace-period=5
+    ignore_errors: yes
+    run_once: true
+
+  - name: Check project is deleted
+    shell: oc get project {{ namespace }} -o jsonpath='{ .status.phase }'
+    register: project_run
+    until: "'Terminating' not in project_run.stdout"
+    delay: 15
+    retries: 40
+    failed_when: "'Active' in project_run.stdout"
+    run_once: true
+
+  - name: Delete templates
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - /tmp/{{namespace}}
+    ignore_errors: true
+    run_once: true

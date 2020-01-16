@@ -70,12 +70,11 @@ objects:
       dockerfile: |-
         FROM ${RUNTIME_IMAGE_STREAM_TAG}
         RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > {{contextdir}}/index.html
-        CMD sleep infinity
     strategy:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: ${DOCKER_IMAGE_TAG}:latest
+          name: ${RUNTIME_IMAGE_STREAM_TAG}:latest
           namespace: ${NAMESPACE}
       type: Docker
     triggers:

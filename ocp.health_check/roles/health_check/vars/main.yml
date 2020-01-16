@@ -1,4 +1,4 @@
 ---
 # vars file for backup_etcd
-default_image_tag: "php-56-rhel7"
-default_builder: "rhscl/php-56-rhel7"
+default_image_tag: "php-72-centos7"
+default_builder: "centos/php-72-centos7"

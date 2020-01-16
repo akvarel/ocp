@@ -7,8 +7,8 @@
   run_once: true
   vars:
     namespace: "app-health-check"
-    builder: "rhscl/php-56-rhel7"
-    runtime_image: "php-56-rhel7"
+#    builder: "rhscl/php-56-rhel7"
+#    runtime_image: "php-56-rhel7"
     sample: "httpd-example"
     contextdir: "/opt/app-root/src"
     domain: "{{ openshift_master_default_subdomain | default(local) }}"
