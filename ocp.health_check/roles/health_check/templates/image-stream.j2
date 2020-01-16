@@ -1,3 +1,4 @@
+---
 apiVersion: image.openshift.io/v1
 kind: ImageStream
 metadata:
@@ -9,6 +10,21 @@ spec:
   - from:
       kind: DockerImage
       name: centos/php-72-centos7
+    name: latest
+    referencePolicy:
+      type: Source
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: {{sample}}
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - from:
+      kind: DockerImage
+      name: {{sample}}
     name: latest
     referencePolicy:
       type: Source

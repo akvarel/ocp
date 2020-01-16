@@ -1,0 +1,3 @@
+---
+# vars file for backup_etcd
+default_image_tag: "php-56-rhel7"

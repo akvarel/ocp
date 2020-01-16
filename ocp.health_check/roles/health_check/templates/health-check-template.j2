@@ -1,0 +1,140 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    description: A health check application.
+    iconClass: icon-php
+    openshift.io/display-name: A health check application.
+    tags: health-check
+    template.openshift.io/documentation-url: https://github.com/akvarel/ocp
+    template.openshift.io/provider-display-name: Red Hat, Inc.
+    template.openshift.io/support-url: https://access.redhat.com
+  name: health-check-template
+objects:
+- apiVersion: v1
+  kind: Route
+  metadata:
+    name: ${NAME}
+  spec:
+    host: ${APPLICATION_DOMAIN}
+    to:
+      kind: Service
+      name: ${NAME}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    annotations:
+      description: Exposes and load balances the application pods
+    name: ${NAME}
+  spec:
+    ports:
+    - name: web
+      port: 8080
+      targetPort: 8080
+    selector:
+      name: ${NAME}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      description: Keeps track of changes in the application runtime image
+    name: ${NAME}
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      description: Defines how to chain the runtime image from the source build image
+    name: ${NAME}-runtime
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${NAME}:latest
+    source:
+      dockerfile: |-
+        FROM ${RUNTIME_IMAGE_STREAM_TAG}
+        #RUN echo 1
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ${RUNTIME_IMAGE_STREAM_TAG}
+          namespace: ${NAMESPACE}
+      type: Docker
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+    - imageChange:
+        from:
+          kind: ImageStreamTag
+          name: ${NAME}:latest
+      type: ImageChange
+- kind: "DeploymentConfig"
+  apiVersion: "v1"
+  metadata:
+    annotations:
+      description: Defines how to deploy the health check
+    name: ${NAME}-runtime
+  spec:
+    template:
+      metadata:
+        labels:
+          name: ${NAME}
+        name: ${NAME}
+      spec:
+        containers:
+        - name: ${NAME}
+          env: []
+          image: ${NAME}:latest
+          ports:
+          - containerPort: 8080
+            protocol: "TCP"
+          - containerPort: 8443
+            protocol: "TCP"
+          resources:
+            limits:
+              memory: ${MEMORY_LIMIT}
+    replicas: 1
+    triggers:
+      - type: "ConfigChange"
+      - type: "ImageChange"
+        imageChangeParams:
+          automatic: true
+          containerNames:
+          - ${NAME}
+          from:
+            kind: "ImageStreamTag"
+            name: ${NAME}:latest
+    strategy:
+      type: "Rolling"
+    selector:
+      name: ${NAME}
+    paused: false
+    revisionHistoryLimit: 2
+    minReadySeconds: 0
+
+parameters:
+- description: The name assigned to all of the frontend objects defined in this template.
+  displayName: Name
+  name: NAME
+  required: true
+  value: {{sample}}
+- description: Maximum amount of memory the container can use.
+  displayName: Memory Limit
+  name: MEMORY_LIMIT
+  required: true
+  value: 128Mi
+- description: The image stream tag which is used to run the application.
+  displayName: Runtime Imagestream Tag
+  name: RUNTIME_IMAGE_STREAM_TAG
+  required: true
+  value: {{ builder | default(default_image_tag) }}
+- description: The OpenShift Namespace where the ImageStream resides.
+  displayName: Namespace
+  name: NAMESPACE
+  required: true
+  value: {{ namespace | default('openshift') }}
+- description: The exposed hostname that will route to the .NET Core service, if left
+    blank a value will be defaulted.
+  displayName: Application Hostname
+  name: APPLICATION_DOMAIN

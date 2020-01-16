@@ -7,7 +7,7 @@
   run_once: true
   vars:
     namespace: "app-health-check"
-    builder: "centos/php-72-centos7"
+    builder: "php-56-rhel7:latest"
     sample: "httpd-example"
     contextdir: "."
     domain: "{{ openshift_master_default_subdomain | default(local) }}"
