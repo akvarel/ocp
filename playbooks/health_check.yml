@@ -7,7 +7,7 @@
   run_once: true
   vars:
     namespace: "app-health-check"
-    builder: "rhscl/php-56-rhel7:latest"
+    builder: "rhscl/php-56-rhel7"
     runtime_image: "php-56-rhel7"
     sample: "httpd-example"
     contextdir: "/opt/app-root/src"
