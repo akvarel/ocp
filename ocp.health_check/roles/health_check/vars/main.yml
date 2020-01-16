@@ -3,5 +3,5 @@
 default_image: "httpd"
 default_image_tag: "latest"
 default_builder: "httpd"
-default_context_dir: "."
+default_context_dir: "htdocs"
 default_port: "80"
