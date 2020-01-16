@@ -1,0 +1,10 @@
+- name: check etcd members
+  hosts: masters
+  become: true
+  tags:
+    - etcd
+  collections:
+    - ocp.backup_restore
+  tasks:
+    - import_role:
+        name: check_etcd

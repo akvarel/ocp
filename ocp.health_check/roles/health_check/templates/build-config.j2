@@ -4,13 +4,16 @@ metadata:
   name: "{{sample}}-build"
 spec:
   runPolicy: "Serial"
+  postCommit: {}
+  resources: {}
   source:
     dockerfile: |
       FROM php:7.2-apache
       RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > /var/www/html/index.html
       RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > /opt/app-root/src/index.html
   strategy:
-    sourceStrategy:
+    type: "Docker"
+    dockerStrategy:
       from:
         kind: "ImageStreamTag"
         name: "php-72-centos7:latest"
@@ -18,6 +21,4 @@ spec:
     to:
       kind: "ImageStreamTag"
       name: "{{sample}}:latest"
-    pushSecret:
-      name: builder-dockercfg-bn8hr
 

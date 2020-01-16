@@ -1,0 +1,9 @@
+---
+# check etcd
+- name: get etcd endpoint
+  shell: grep https {{ ETCD_POD_MANIFEST }} | cut -d '/' -f3
+  register: etcd_ep
+
+- name: etcd member list
+  shell: "{{ MASTER_EXEC }} etcd etcd /bin/bash -c \"ETCDCTL_API=3 /usr/bin/etcdctl --cert /etc/etcd/peer.crt --key /etc/etcd/peer.key --cacert /etc/etcd/ca.crt --endpoints {{ etcd_ep.stdout }} member list\""
+  register: member_result
