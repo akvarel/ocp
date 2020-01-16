@@ -44,7 +44,7 @@ objects:
   metadata:
     annotations:
       description: Defines how to chain the runtime image from the source build image
-    name: ${NAME}-runtime
+    name: ${NAME}-build
   spec:
     output:
       to:
@@ -53,6 +53,7 @@ objects:
     source:
       dockerfile: |-
         FROM ${RUNTIME_IMAGE_STREAM_TAG}
+        CMD sleep infinity
         #RUN echo 1
     strategy:
       dockerStrategy:
