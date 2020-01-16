@@ -1,6 +1,6 @@
 ---
 # vars file for backup_etcd
 default_image: "httpd"
-default_image_tag: "2.4"
+default_image_tag: "latest"
 default_builder: "httpd"
 default_context_dir: "/var/www/html"
