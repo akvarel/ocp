@@ -40,7 +40,7 @@
     - name: Delete all objects
       shell: |
         oc delete all -l app={{sample}} --grace-period=5
-        oc delete tempate health-check-template
+        oc delete template health-check-template
       run_once: true
       ignore_errors: true
 
