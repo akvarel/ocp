@@ -15,6 +15,15 @@
     run_once: true
     when: "namespace not in projects.stdout"
 
+  - name: Create folder
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - /tmp/{{namespace}}
+    ignore_errors: true
+    run_once: true
+
   - name: Create Application in {{ namespace }}
     block:
     - name: Copy over build-config template
@@ -22,9 +31,9 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
-        - { src: 'templates/build-config.j2' , dest: '/tmp/build-config.yaml' }
-        - { src: 'templates/deployment-config.j2' , dest: '/tmp/deployment-config.yaml' }
-        - { src: 'templates/image-stream.j2' , dest: '/tmp/image-stream.yaml' }
+        - { src: 'templates/build-config.j2' , dest: '/tmp/{{namespace}}/build-config.yaml' }
+        - { src: 'templates/deployment-config.j2' , dest: '/tmp/{{namespace}}/deployment-config.yaml' }
+        - { src: 'templates/image-stream.j2' , dest: '/tmp/{{namespace}}/image-stream.yaml' }
       run_once: true
 
     - name: Delete all objects
@@ -35,23 +44,12 @@
     - name: Create the build and deployment configs
       shell: oc create -f {{ item }} -n {{ namespace }}
       with_items:
-        - /tmp/build-config.yaml
-        - /tmp/deployment-config.yaml
-        - /tmp/image-stream.yaml
+        - /tmp/{{namespace}}/build-config.yaml
+        - /tmp/{{namespace}}/deployment-config.yaml
+        - /tmp/{{namespace}}/image-stream.yaml
       run_once: true
     - name: Start a build
       shell: oc start-build {{sample}}-build --wait
-    always:
-    - name: Delete template
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - /tmp/build-config.yaml
-        - /tmp/deployment-config.yaml
-        - /tmp/image-stream.yaml
-      ignore_errors: true
-      run_once: true
 
   - name: Check deployment status
     shell: oc rollout status deploymentconfig {{ sample }} -n {{ namespace }} 
@@ -91,26 +89,15 @@
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       with_items:
-        - { src: 'templates/health-file.j2' , dest: '/tmp/health-file.yaml' }
-        - { src: 'templates/health-block.j2' , dest: '/tmp/health-block.yaml' }
+        - { src: 'templates/health-file.j2' , dest: '/tmp/{{namespace}}/health-file.yaml' }
+        - { src: 'templates/health-block.j2' , dest: '/tmp/{{namespace}}/health-block.yaml' }
       run_once: true
 
     - name: Create storage
       shell: oc create -f {{ item }} -n {{ namespace }}
       with_items: 
-        - /tmp/health-file.yaml
-        - /tmp/health-block.yaml
-      run_once: true
-
-    always:
-    - name: Delete templates
-      file:
-          path: "{{ item }}"
-          state: absent
-      with_items:
-          - /tmp/health-file.yaml
-          - /tmp/health-block.yaml
-      ignore_errors: true
+        - /tmp/{{namespace}}/health-file.yaml
+        - /tmp/{{namespace}}/health-block.yaml
       run_once: true
 
   - name: Check for PVC Bound state file-storage
@@ -203,30 +190,29 @@
       shell: oc set volume dc/{{ sample }} --remove --name=tmp-mount
       run_once: true
 
-    always:
-    - name: Delete templates
-      file:
-          path: "{{ item }}"
-          state: absent
-      with_items:
-          - /tmp/{{namespace}}
-      ignore_errors: true
-      run_once: true
-
-  always:
-
-  - name: Delete {{ namespace }} project
-    shell: |
-      oc delete all -l app={{sample}} --grace-period=5
-      oc delete project {{ namespace }} --grace-period=5
-    ignore_errors: yes
-    run_once: true
-
-  - name: Check project is deleted
-    shell: oc get project {{ namespace }} -o jsonpath='{ .status.phase }'
-    register: project_run
-    until: "'Terminating' not in project_run.stdout"
-    delay: 15
-    retries: 40
-    failed_when: "'Active' in project_run.stdout"
-    run_once: true
+#  always:
+#
+#  - name: Delete {{ namespace }} project
+#    shell: |
+#      oc delete all -l app={{sample}} --grace-period=5
+#      oc delete project {{ namespace }} --grace-period=5
+#    ignore_errors: yes
+#    run_once: true
+#
+#  - name: Check project is deleted
+#    shell: oc get project {{ namespace }} -o jsonpath='{ .status.phase }'
+#    register: project_run
+#    until: "'Terminating' not in project_run.stdout"
+#    delay: 15
+#    retries: 40
+#    failed_when: "'Active' in project_run.stdout"
+#    run_once: true
+#
+#  - name: Delete templates
+#    file:
+#      path: "{{ item }}"
+#      state: absent
+#    with_items:
+#      - /tmp/{{namespace}}
+#    ignore_errors: true
+#    run_once: true
