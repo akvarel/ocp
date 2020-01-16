@@ -32,9 +32,6 @@
         dest: "{{ item.dest }}"
       with_items:
         - { src: 'templates/health-check-template.j2' , dest: '/tmp/{{namespace}}/health-check-template.yaml' }
-#        - { src: 'templates/build-config.j2' , dest: '/tmp/{{namespace}}/build-config.yaml' }
-#        - { src: 'templates/deployment-config.j2' , dest: '/tmp/{{namespace}}/deployment-config.yaml' }
-#        - { src: 'templates/image-stream.j2' , dest: '/tmp/{{namespace}}/image-stream.yaml' }
       run_once: true
 
     - name: Delete all objects
@@ -48,9 +45,6 @@
       shell: oc create -f {{ item }} -n {{ namespace }}
       with_items:
         - /tmp/{{namespace}}/health-check-template.yaml
-#        - /tmp/{{namespace}}/build-config.yaml
-#        - /tmp/{{namespace}}/deployment-config.yaml
-#        - /tmp/{{namespace}}/image-stream.yaml
       run_once: true
     - name: Process template
       shell: oc process health-check-template | oc create -f -
@@ -72,7 +66,7 @@
     run_once: true
 
   - name: Pool for Health Check Deployment success
-    shell: oc get rc -o jsonpath='{ ..metadata.annotations.openshift\.io/deployment\.phase }'  -n {{ namespace }}
+    shell: oc get rc -o jsonpath='{ ..metadata.annotations.openshift\.io/deployment\.phase }' -n {{ namespace }}
     register: httpd_run
     until: "'Running' not in httpd_run.stdout"
     delay: 15
