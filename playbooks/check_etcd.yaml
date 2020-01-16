@@ -8,3 +8,5 @@
   tasks:
     - import_role:
         name: check_etcd
+    - debug:
+        msg: "{{member_result.stdout}}"
