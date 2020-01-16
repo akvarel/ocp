@@ -39,6 +39,20 @@ objects:
     annotations:
       description: Keeps track of changes in the application runtime image
     name: ${NAME}
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    name: ${RUNTIME_IMAGE_STREAM_TAG}
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - from:
+        kind: DockerImage
+        name: ${DOCKER_IMAGE_TAG}
+      name: latest
+      referencePolicy:
+        type: Source
 - apiVersion: v1
   kind: BuildConfig
   metadata:
@@ -129,7 +143,12 @@ parameters:
   displayName: Runtime Imagestream Tag
   name: RUNTIME_IMAGE_STREAM_TAG
   required: true
-  value: {{ builder | default(default_image_tag) }}
+  value: {{ runtime_image | default(default_image_tag) }}
+- description: The image stream tag which is used to run the application.
+  displayName: Runtime Imagestream Tag
+  name: DOCKER_IMAGE_TAG
+  required: true
+  value: {{ builder | default(default_builder) }}
 - description: The OpenShift Namespace where the ImageStream resides.
   displayName: Namespace
   name: NAMESPACE
