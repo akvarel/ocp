@@ -51,7 +51,7 @@
 #        - /tmp/{{namespace}}/image-stream.yaml
       run_once: true
     - name: Process template
-      shell: oc process health-check-template
+      shell: oc process health-check-template | oc create -f -
     - name: Start a build
       shell: oc start-build {{sample}}-build --wait
 
@@ -199,6 +199,7 @@
 #  - name: Delete {{ namespace }} project
 #    shell: |
 #      oc delete all -l app={{sample}} --grace-period=5
+#      oc delete template health-check-template
 #      oc delete project {{ namespace }} --grace-period=5
 #    ignore_errors: yes
 #    run_once: true

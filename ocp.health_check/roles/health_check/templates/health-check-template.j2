@@ -53,8 +53,8 @@ objects:
     source:
       dockerfile: |-
         FROM ${RUNTIME_IMAGE_STREAM_TAG}
+        RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > {{contextdir}}/index.html
         CMD sleep infinity
-        #RUN echo 1
     strategy:
       dockerStrategy:
         from:
