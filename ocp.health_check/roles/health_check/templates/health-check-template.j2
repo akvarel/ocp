@@ -73,7 +73,7 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: ${RUNTIME_IMAGE_STREAM_TAG}
+          name: "${DOCKER_IMAGE_TAG}
           namespace: ${NAMESPACE}
       type: Docker
     triggers:
