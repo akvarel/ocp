@@ -70,6 +70,7 @@ objects:
       dockerfile: |-
         FROM ${RUNTIME_IMAGE_STREAM_TAG}:${DOCKER_IMAGE_TAG}
         RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > {{contextdir | default(default_context_dir)}}/index.html
+        CMD sleep infinity
     strategy:
       dockerStrategy:
         from:
