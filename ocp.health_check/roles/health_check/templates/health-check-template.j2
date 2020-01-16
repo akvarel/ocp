@@ -29,8 +29,8 @@ objects:
   spec:
     ports:
     - name: web
-      port: 8080
-      targetPort: 8080
+      port: {{port | default(default_port)}}
+      targetPort: {{port | default(default_port)}}
     selector:
       name: ${NAME}
 - apiVersion: v1
@@ -98,7 +98,7 @@ objects:
           env: []
           image: ${NAME}:latest
           ports:
-          - containerPort: 8080
+          - containerPort: {{port | default(default_port)}}
             protocol: "TCP"
           - containerPort: 8443
             protocol: "TCP"
