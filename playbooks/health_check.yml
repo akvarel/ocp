@@ -9,8 +9,9 @@
     namespace: "app-health-check"
 #    builder: "rhscl/php-56-rhel7"
 #    runtime_image: "php-56-rhel7"
+#    runtime_image_tag: "latest"
     sample: "httpd-example"
-    contextdir: "/opt/app-root/src"
+#    contextdir: "/opt/app-root/src"
     domain: "{{ openshift_master_default_subdomain | default(local) }}"
   collections:
     - ocp.health_check

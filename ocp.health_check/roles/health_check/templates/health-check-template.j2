@@ -51,9 +51,9 @@ objects:
     tags:
     - from:
         kind: DockerImage
-        name: ${DOCKER_IMAGE_TAG}
-      name: latest
-      referencePolicy:
+        name: ${DOCKER_IMAGE}
+      name: ${DOCKER_IMAGE_TAG}
+      referencePolicylatest:
         type: Source
 - apiVersion: v1
   kind: BuildConfig
@@ -68,13 +68,13 @@ objects:
         name: ${NAME}:latest
     source:
       dockerfile: |-
-        FROM ${RUNTIME_IMAGE_STREAM_TAG}
-        RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > {{contextdir}}/index.html
+        FROM ${RUNTIME_IMAGE_STREAM_TAG}:${DOCKER_IMAGE_TAG}
+        RUN echo '<html><head><title>Hello, world!</title></head><body>Hello!</body></html>' > {{contextdir | default(default_context_dir)}}/index.html
     strategy:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: ${RUNTIME_IMAGE_STREAM_TAG}:latest
+          name: ${RUNTIME_IMAGE_STREAM_TAG}:${DOCKER_IMAGE_TAG}
           namespace: ${NAMESPACE}
       type: Docker
     triggers:
@@ -138,12 +138,17 @@ parameters:
   displayName: Runtime Imagestream Tag
   name: RUNTIME_IMAGE_STREAM_TAG
   required: true
-  value: {{ runtime_image | default(default_image_tag) }}
+  value: {{ runtime_image | default(default_image) }}{{
+- description: The image stream tag which is used to run the application.
+  displayName: Runtime Imagestream Tag
+  name: DOCKER_IMAGE
+  required: true
+  value: {{ builder | default(default_builder) }}
 - description: The image stream tag which is used to run the application.
   displayName: Runtime Imagestream Tag
   name: DOCKER_IMAGE_TAG
   required: true
-  value: {{ builder | default(default_builder) }}
+  value: {{ runtime_image_tag | default(default_image_tag) }}
 - description: The OpenShift Namespace where the ImageStream resides.
   displayName: Namespace
   name: NAMESPACE
