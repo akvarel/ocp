@@ -78,13 +78,7 @@ objects:
           namespace: ${NAMESPACE}
       type: Docker
     triggers:
-    - type: ImageChange
     - type: ConfigChange
-    - imageChange:
-        from:
-          kind: ImageStreamTag
-          name: ${NAME}:latest
-      type: ImageChange
 - kind: "DeploymentConfig"
   apiVersion: "v1"
   metadata:
