@@ -80,10 +80,6 @@
     failed_when: "'Failed' in httpd_run.stdout"
     run_once: true
 
-  - name: Create route
-    shell: oc create route edge --service={{ sample }}
-    run_once: true
-
   - name: Wait for api server to be ready
     command: >
       curl -k -s https://{{ sample }}-{{ namespace }}.{{ domain }}
