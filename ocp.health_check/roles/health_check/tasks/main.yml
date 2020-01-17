@@ -101,6 +101,10 @@
     delay: 3
     changed_when: false
 
+  - name: Get storage classes
+    shell: oc get sc -o jsonpath='{..metadata.name}'
+    register: storage_classes
+
   - name: Create storage from template
     block:
     - name: Copy over pvc template to check file storage
@@ -127,6 +131,10 @@
     retries: 40
     failed_when: "'Failed' in file_run.stdout"
     run_once: true
+
+  - name: Get storage classes
+    shell: oc get sc -o jsonpath='{..metadata.name}'
+    register: storage_classes
 
   - name: Check for PVC Bound state file-storage
     shell: oc get pvc health-block -o jsonpath='{ .status.phase }' -n {{ namespace }}
