@@ -24,7 +24,13 @@
     ignore_errors: true
     run_once: true
 
+  - name: Create Application in {{ namespace }} as s2i
+    shell: oc new-app --name={{ sample }} {{ builder }}~{{ gitrepo | default(default_git) }} --context-dir={{ contextdir }} -n {{ namespace }}
+    run_once: true
+    when: "gitrepo is defined"
+
   - name: Create Application in {{ namespace }}
+    when: "gitrepo is defined"
     block:
     - name: Copy over build-config template
       template:

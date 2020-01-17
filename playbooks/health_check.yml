@@ -12,6 +12,8 @@
 #    runtime_image_tag: "latest"
     sample: "httpd-example"
 #    contextdir: "/opt/app-root/src"
+    contextdir: "."
+#    gitrepo: "https://github.com/akvarel/php-apache.git"
 #    port: 8080
   collections:
     - ocp.health_check
