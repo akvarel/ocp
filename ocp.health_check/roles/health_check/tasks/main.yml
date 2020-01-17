@@ -33,7 +33,7 @@
     when: "s2i_build_local"
     block:
     - name: Create a project from local source
-      shell: oc new-app --name={{ sample }} --docker-image={{ builder | default(default_s2i) }} --code={{local_code_path}} -n {{ namespace }}
+      shell: oc new-app --name="{{ sample }}" --docker-image={{ builder | default(default_s2i) }} --code="{{local_code_path}}" -n {{ namespace }}
       run_once: true
 
     - name: Make a build from local source
