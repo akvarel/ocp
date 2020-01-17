@@ -88,7 +88,7 @@
     until: "'Running' not in httpd_run.stdout"
     delay: 15
     retries: 40
-    failed_when: "'Failed' in httpd_run.stdout"
+    failed_when: "'Complete' not in httpd_run.stdout"
     run_once: true
 
   - name: Create route
@@ -154,6 +154,7 @@
     delay: 15
     retries: 40
     failed_when: "'Failed' in block_run.stdout"
+    when: "'block' in storage_classes.stdout"
     run_once: true
 
   - name: Create php file from template
@@ -189,7 +190,7 @@
       until: "'Running' not in pod_run.stdout"
       delay: 15
       retries: 40
-      failed_when: "'Failed' in pod_run.stdout"
+      failed_when: "'Complete' not in pod_run.stdout"
       run_once: true
 
     - name: Get pod name
