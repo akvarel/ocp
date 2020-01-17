@@ -25,6 +25,7 @@ oc adm policy add-cluster-role-to-user cluster-admin system:serviceaccount:glust
 ansible-vault encrypt_string --stdin-name 'api_token'
 ansible-vault encrypt_string --stdin-name 'master_api'
 ````
+### Backup and restore
 Important variables for backup of PV:
 ````
 backup_dir_base
@@ -40,3 +41,6 @@ If you need to create a project request template use this command and then custo
 ````
 oc adm create-bootstrap-project-template -o yaml > templates/project-request-template.yaml
 ````
+### Health check playbook
+If you want to run health check you should make sure you have an access to s2i base image for php and you have an access to https://github.com/akvarel/php-apache.git
+If you have no access to github then clone the project into your corporate git and set variable gitrepo=\<your repo path\>

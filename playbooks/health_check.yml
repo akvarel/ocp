@@ -9,8 +9,10 @@
     namespace: "app-health-check"
     sample: "httpd-example"
     contextdir: "."
+    s2i_build_local: true
+    local_code_path: {{playbook_dir}}/../src/php-apache
+    s2i_build: false
 #    gitrepo: "https://github.com/akvarel/php-apache.git"
-#    s2i_build: false
 # Other variables for changing default behaviour
 #    builder: "rhscl/php-56-rhel7"
 #    runtime_image: "php-56-rhel7"

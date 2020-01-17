@@ -29,8 +29,13 @@
     run_once: true
     when: "s2i_build"
 
+  - name: Create Application in {{ namespace }} as s2i from local code
+    shell: oc new-app --name={{ sample }} --docker-image={{ builder | default(default_s2i) }} --code={{local_code_path}} -n {{ namespace }}
+    run_once: true
+    when: "s2i_build_local"
+
   - name: Create Application in {{ namespace }}
-    when: "not s2i_build"
+    when: "not s2i_build and not s2i_build_local"
     block:
     - name: Copy over build-config template
       template:
