@@ -80,6 +80,11 @@
     failed_when: "'Failed' in httpd_run.stdout"
     run_once: true
 
+  - name: Create route
+    shell: oc create route edge --service={{ sample }}
+    run_once: true
+    when: s2i_build
+
   - name: Get route
     shell: oc get route {{ sample }} -o jsonpath='{ ..spec.host }' -n {{ namespace }}
     register: route
