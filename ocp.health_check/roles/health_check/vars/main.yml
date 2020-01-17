@@ -7,4 +7,5 @@ default_context_dir: "htdocs"
 default_port: "80"
 default_git: "https://github.com/akvarel/php-apache.git"
 default_s2i: "centos/php-72-centos7"
-s2i_build: true
+s2i_build: false
+s2i_build_local: true
