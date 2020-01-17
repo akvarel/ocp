@@ -13,7 +13,6 @@
     sample: "httpd-example"
 #    contextdir: "/opt/app-root/src"
 #    port: 8080
-    domain: "{{ openshift_master_default_subdomain | default('local') }}"
   collections:
     - ocp.health_check
   tasks:

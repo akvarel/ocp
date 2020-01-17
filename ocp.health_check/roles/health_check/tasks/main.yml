@@ -74,9 +74,14 @@
     failed_when: "'Failed' in httpd_run.stdout"
     run_once: true
 
-  - name: Wait for api server to be ready
+  - name: Get route
+    shell: oc get route {{ sample }} -o jsonpath='{ ..spec.host }' -n {{ namespace }}
+    register: route
+    run_once: true
+
+  - name: Wait correct response
     command: >
-      curl -k -s https://{{ sample }}-{{ namespace }}.{{ domain }}
+      curl -k -s https://{{ route.stdout }}
     args:
       warn: no
     register: api_health
@@ -173,7 +178,7 @@
 
     - name: Check PHP verstion
       command: >
-        curl -k -s https://{{ sample }}-{{ namespace }}.{{ domain }}
+        curl -k -s https://{{ route.stdout }}
       args:
         warn: no
       register: api_health
