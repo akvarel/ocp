@@ -9,8 +9,8 @@
     namespace: "app-health-check"
     sample: "httpd-example"
     contextdir: "."
-# If gitrepo undefined then template project will be created
-    gitrepo: "https://github.com/akvarel/php-apache.git"
+#    gitrepo: "https://github.com/akvarel/php-apache.git"
+#    s2i_build: false
 # Other variables for changing default behaviour
 #    builder: "rhscl/php-56-rhel7"
 #    runtime_image: "php-56-rhel7"
