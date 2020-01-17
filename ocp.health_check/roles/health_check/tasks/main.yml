@@ -30,7 +30,7 @@
     when: "gitrepo is defined"
 
   - name: Create Application in {{ namespace }}
-    when: "gitrepo is defined"
+    when: "gitrepo is undefined"
     block:
     - name: Copy over build-config template
       template:

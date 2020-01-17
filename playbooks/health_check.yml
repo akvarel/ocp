@@ -7,13 +7,15 @@
   run_once: true
   vars:
     namespace: "app-health-check"
+    sample: "httpd-example"
+    contextdir: "."
+# If gitrepo undefined then template project will be created
+    gitrepo: "https://github.com/akvarel/php-apache.git"
+# Other variables for changing default behaviour
 #    builder: "rhscl/php-56-rhel7"
 #    runtime_image: "php-56-rhel7"
 #    runtime_image_tag: "latest"
-    sample: "httpd-example"
 #    contextdir: "/opt/app-root/src"
-    contextdir: "."
-#    gitrepo: "https://github.com/akvarel/php-apache.git"
 #    port: 8080
   collections:
     - ocp.health_check
