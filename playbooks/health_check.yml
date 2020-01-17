@@ -10,7 +10,7 @@
     sample: "httpd-example"
     contextdir: "."
     s2i_build_local: true
-    local_code_path: {{playbook_dir}}/../src/php-apache
+    local_code_path: "{{playbook_dir}}/../src/php-apache"
     s2i_build: false
 #    gitrepo: "https://github.com/akvarel/php-apache.git"
 # Other variables for changing default behaviour
