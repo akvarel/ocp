@@ -30,9 +30,15 @@
     when: "s2i_build"
 
   - name: Create Application in {{ namespace }} as s2i from local code
-    shell: oc new-app --name={{ sample }} --docker-image={{ builder | default(default_s2i) }} --code={{local_code_path}} -n {{ namespace }}
-    run_once: true
     when: "s2i_build_local"
+    block:
+    - name: Create a project from local source
+      shell: oc new-app --name={{ sample }} --docker-image={{ builder | default(default_s2i) }} --code={{local_code_path}} -n {{ namespace }}
+      run_once: true
+
+    - name: Make a build from local source
+      shell: oc start-build {{sample}} --from-dir="{{local_code_path}}" --follow -n {{ namespace }}
+      run_once: true
 
   - name: Create Application in {{ namespace }}
     when: "not s2i_build and not s2i_build_local"
